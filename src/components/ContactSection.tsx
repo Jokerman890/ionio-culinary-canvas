@@ -84,9 +84,12 @@ export function ContactSection() {
                   </div>
                   <div>
                     <h3 className="font-serif text-lg text-foreground mb-1">Reservierung</h3>
-                    <p className="text-muted-foreground">
-                      Rufen Sie uns an oder besuchen Sie uns direkt
-                    </p>
+                    <a 
+                      href="tel:+49422277411 10"
+                      className="text-muted-foreground hover:text-gold transition-colors text-lg font-medium"
+                    >
+                      04222 77 411 10
+                    </a>
                   </div>
                 </div>
 
@@ -96,9 +99,10 @@ export function ContactSection() {
                   </div>
                   <div>
                     <h3 className="font-serif text-lg text-foreground mb-1">Öffnungszeiten</h3>
-                    <p className="text-muted-foreground">
-                      Täglich geöffnet – Aktuelle Zeiten auf Anfrage
-                    </p>
+                    <div className="text-muted-foreground space-y-1">
+                      <p>Mi – Mo: 11:30 – 14:30 & 17:30 – 22:30</p>
+                      <p className="text-gold/80 font-medium">Dienstag Ruhetag</p>
+                    </div>
                   </div>
                 </div>
 
