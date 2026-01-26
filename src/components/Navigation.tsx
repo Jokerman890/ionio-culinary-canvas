@@ -3,7 +3,7 @@ import { Menu, X } from 'lucide-react';
 
 const navItems = [
   { label: 'Über uns', href: '#ueber-uns' },
-  { label: 'Küche', href: '#kueche' },
+  { label: 'Speisekarte', href: '#speisekarte' },
   { label: 'Galerie', href: '#galerie' },
   { label: 'Kontakt', href: '#kontakt' },
 ];
