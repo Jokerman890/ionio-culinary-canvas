@@ -1,3 +1,5 @@
+import logoImage from '@/assets/logo.png';
+
 const socialLinks = [
   {
     name: 'Instagram',
@@ -35,9 +37,11 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Logo & Name */}
           <div className="text-center md:text-left">
-            <h3 className="font-serif text-2xl text-primary-foreground mb-2">
-              <span className="text-gold">IONIO</span>
-            </h3>
+            <img 
+              src={logoImage} 
+              alt="IONIO Restaurant Logo" 
+              className="h-12 w-auto mb-3 mx-auto md:mx-0"
+            />
             <p className="text-primary-foreground/60 text-sm">
               Griechisches Restaurant
             </p>
