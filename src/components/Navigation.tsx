@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import logoImage from '@/assets/logo.png';
 
 const navItems = [
   { label: 'Über uns', href: '#ueber-uns' },
@@ -26,13 +27,17 @@ export function Navigation() {
           {/* Logo */}
           <a 
             href="#" 
-            className="font-serif text-xl md:text-2xl text-primary-foreground tracking-wide"
+            className="block"
             onClick={(e) => {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
           >
-            <span className="text-gold">IONIO</span>
+            <img 
+              src={logoImage} 
+              alt="IONIO Restaurant Logo" 
+              className="h-10 md:h-12 w-auto"
+            />
           </a>
 
           {/* Desktop Navigation */}
