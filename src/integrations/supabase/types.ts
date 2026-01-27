@@ -82,6 +82,7 @@ export type Database = {
           description: string | null
           id: string
           is_available: boolean | null
+          is_popular: boolean | null
           is_vegetarian: boolean | null
           name: string
           price: number
@@ -95,6 +96,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_available?: boolean | null
+          is_popular?: boolean | null
           is_vegetarian?: boolean | null
           name: string
           price: number
@@ -108,6 +110,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_available?: boolean | null
+          is_popular?: boolean | null
           is_vegetarian?: boolean | null
           name?: string
           price?: number
@@ -166,6 +169,48 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_offers: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          original_price: number | null
+          position: number
+          price: number
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          original_price?: number | null
+          position: number
+          price: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          original_price?: number | null
+          position?: number
+          price?: number
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
         }
         Relationships: []
       }

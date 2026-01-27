@@ -157,6 +157,57 @@
     box-shadow: 0 20px 40px -12px hsl(var(--navy) / 0.15);
   }
 
+  /* Button hover animations */
+  .btn-animate {
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--duration-short) var(--ease-default),
+                box-shadow var(--duration-short) var(--ease-default);
+  }
+
+  .btn-animate::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--gold-light) / 0.3),
+      transparent
+    );
+    transition: left var(--duration-default) var(--ease-smooth);
+  }
+
+  .btn-animate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -8px hsl(var(--gold) / 0.4);
+  }
+
+  .btn-animate:hover::before {
+    left: 100%;
+  }
+
+  .btn-animate:active {
+    transform: translateY(0);
+  }
+
+  /* Pulse glow animation for CTA buttons */
+  .btn-glow {
+    animation: btnGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes btnGlow {
+    0%, 100% {
+      box-shadow: 0 0 5px hsl(var(--gold) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px hsl(var(--gold) / 0.5), 0 0 30px hsl(var(--gold) / 0.3);
+    }
+  }
+
   /* Gallery image hover */
   .gallery-image {
     transition: transform 200ms var(--ease-default);
