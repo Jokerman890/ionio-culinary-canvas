@@ -31,13 +31,25 @@ export function HeroSection() {
           Tradition. Qualität. Mediterraner Genuss.
         </p>
         
-        <div className="hero-animate hero-animate-delay-2">
+        <div className="hero-animate hero-animate-delay-2 flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
             variant="hero" 
             size="xl"
             onClick={scrollToContact}
+            className="btn-animate btn-glow"
           >
             Kontakt & Anfahrt
+          </Button>
+          <Button 
+            variant="heroOutline" 
+            size="xl"
+            onClick={() => {
+              const el = document.querySelector('#speisekarte');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="btn-animate"
+          >
+            Speisekarte
           </Button>
         </div>
       </div>
