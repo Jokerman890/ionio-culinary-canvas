@@ -106,6 +106,10 @@ function GalleryImage({
         <img
           src={image.src}
           alt={image.alt}
+          loading="lazy"
+          decoding="async"
+          width={400}
+          height={400}
           className="w-full h-full object-cover gallery-image"
         />
         <div className="absolute inset-0 bg-navy/0 group-hover:bg-navy/15 gallery-overlay" />
