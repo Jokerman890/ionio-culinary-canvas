@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import logoImage from '@/assets/logo.png';
 
 const socialLinks = [
@@ -68,19 +69,19 @@ export function Footer() {
 
           {/* Legal Links */}
           <div className="flex flex-col md:flex-row items-center gap-4 text-sm">
-            <a 
-              href="#impressum" 
+            <Link 
+              to="/impressum" 
               className="text-primary-foreground/60 hover:text-gold transition-colors"
             >
               Impressum
-            </a>
+            </Link>
             <span className="hidden md:inline text-primary-foreground/30">|</span>
-            <a 
-              href="#datenschutz" 
+            <Link 
+              to="/datenschutz" 
               className="text-primary-foreground/60 hover:text-gold transition-colors"
             >
               Datenschutz
-            </a>
+            </Link>
           </div>
         </div>
 
