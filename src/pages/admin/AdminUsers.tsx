@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useServerAuth } from '@/hooks/useServerAuth';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Trash2, Loader2, Shield, User } from 'lucide-react';
+import { Plus, Trash2, Loader2, Shield, User, ShieldAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface UserRole {
@@ -22,6 +23,7 @@ interface UserRole {
 
 export default function AdminUsers() {
   const { user } = useAuthContext();
+  const { isAdmin: serverVerifiedAdmin, isLoading: verifying, isVerified } = useServerAuth();
   const [users, setUsers] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -33,8 +35,10 @@ export default function AdminUsers() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (isVerified && serverVerifiedAdmin) {
+      fetchUsers();
+    }
+  }, [isVerified, serverVerifiedAdmin]);
 
   async function fetchUsers() {
     setLoading(true);
@@ -126,6 +130,34 @@ export default function AdminUsers() {
       toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
     }
   };
+
+  // Show loading while verifying server-side
+  if (verifying || !isVerified) {
+    return (
+      <AdminLayout>
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-gold" />
+          <p className="text-muted-foreground">Berechtigungen werden überprüft...</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  // Server-side verification failed - not an admin
+  if (!serverVerifiedAdmin) {
+    return (
+      <AdminLayout>
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <ShieldAlert className="w-12 h-12 text-destructive" />
+          <h2 className="text-xl font-semibold text-foreground">Zugriff verweigert</h2>
+          <p className="text-muted-foreground text-center max-w-md">
+            Sie haben keine Administrator-Berechtigung für diese Seite. 
+            Nur Administratoren können Benutzer verwalten.
+          </p>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   if (loading) {
     return (
