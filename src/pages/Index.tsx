@@ -5,6 +5,7 @@ import { MenuSection } from '@/components/MenuSection';
 import { GallerySection } from '@/components/GallerySection';
 import { ContactSection } from '@/components/ContactSection';
 import { Footer } from '@/components/Footer';
+import { CookieBanner } from '@/components/CookieBanner';
 
 const Index = () => {
   return (
@@ -16,6 +17,7 @@ const Index = () => {
       <GallerySection />
       <ContactSection />
       <Footer />
+      <CookieBanner />
     </main>
   );
 };
