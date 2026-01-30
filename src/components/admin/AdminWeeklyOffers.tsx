@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Star, Save, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { getUserFriendlyError } from '@/lib/errorMessages';
 
 interface WeeklyOffer {
   id: string;
@@ -82,8 +83,9 @@ export function AdminWeeklyOffers() {
 
       if (error) throw error;
       toast({ title: `Angebot ${offer.position} gespeichert` });
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminWeeklyOffers.saveOffer');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     } finally {
       setSaving(null);
     }
@@ -107,8 +109,9 @@ export function AdminWeeklyOffers() {
         if (error) throw error;
       }
       toast({ title: 'Alle Angebote gespeichert' });
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminWeeklyOffers.saveAllOffers');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     } finally {
       setSaving(null);
     }

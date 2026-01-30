@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Loader2, GripVertical, Star, UtensilsCrossed } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AdminWeeklyOffers } from '@/components/admin/AdminWeeklyOffers';
+import { getUserFriendlyError } from '@/lib/errorMessages';
 
 interface Category {
   id: string;
@@ -132,8 +133,9 @@ export default function AdminMenu() {
       }
       setCategoryDialogOpen(false);
       fetchData();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminMenu.saveCategory');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -147,8 +149,9 @@ export default function AdminMenu() {
       if (error) throw error;
       toast({ title: 'Kategorie gelöscht' });
       fetchData();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminMenu.deleteCategory');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     }
   };
 
@@ -227,8 +230,9 @@ export default function AdminMenu() {
       }
       setItemDialogOpen(false);
       fetchData();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminMenu.saveItem');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -242,8 +246,9 @@ export default function AdminMenu() {
       if (error) throw error;
       toast({ title: 'Gericht gelöscht' });
       fetchData();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminMenu.deleteItem');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     }
   };
 
@@ -255,8 +260,9 @@ export default function AdminMenu() {
         .eq('id', item.id);
       if (error) throw error;
       fetchData();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminMenu.toggleAvailability');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     }
   };
 
