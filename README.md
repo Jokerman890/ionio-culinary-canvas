@@ -1,73 +1,111 @@
-# Welcome to your Lovable project
+# Ionio Restaurant - Website & Admin Dashboard
 
-## Project info
+Eine moderne Restaurant-Website mit integriertem Admin-Dashboard für das griechische Restaurant Ionio in Ganderkesee.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🌟 Features
 
-## How can I edit this code?
+### Öffentliche Website
+- **Hero-Bereich** mit animiertem Hintergrund
+- **Speisekarte** mit Kategorien, Allergene-Kennzeichnung und Wochenangeboten
+- **Galerie** mit Lazy-Loading für optimale Performance
+- **Kontaktbereich** mit Öffnungszeiten und Wegbeschreibung
+- **SEO-optimiert** mit Preconnect-Hints und optimierten Bildern
+- **Responsive Design** für alle Geräte
 
-There are several ways of editing your application.
+### Admin-Dashboard (`/admin`)
+- **Speisekarten-Verwaltung**: Kategorien und Gerichte erstellen, bearbeiten, löschen
+- **Wochenangebote**: 3 prominente Angebotsplätze verwalten
+- **Galerie-Verwaltung**: Bilder hochladen, bearbeiten, ein-/ausblenden
+- **Einstellungen**: Kontaktdaten und Öffnungszeiten ändern
+- **Benutzerverwaltung**: Mitarbeiter-Zugänge verwalten (nur Admins)
 
-**Use Lovable**
+### Sicherheit
+- **Rollenbasierte Zugriffskontrolle** (Admin/Staff)
+- **Server-seitige Validierung** via Edge Functions
+- **Row-Level Security (RLS)** für alle Datenbanktabellen
+- **Sichere Fehlermeldungen** ohne technische Details
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🛠 Technologie-Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (Lovable Cloud)
+  - PostgreSQL Datenbank
+  - Row-Level Security
+  - Edge Functions (Deno)
+  - Storage für Bilder
+- **Authentifizierung**: Supabase Auth
 
-**Use your preferred IDE**
+## 📁 Projektstruktur
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```
+src/
+├── components/
+│   ├── admin/          # Admin-Dashboard Komponenten
+│   ├── menu/           # Speisekarten-Komponenten
+│   └── ui/             # shadcn/ui Komponenten
+├── contexts/           # React Contexts (Auth)
+├── hooks/              # Custom React Hooks
+├── lib/                # Utility-Funktionen
+├── pages/
+│   └── admin/          # Admin-Seiten
+└── integrations/       # Supabase Client
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+supabase/
+├── functions/
+│   └── verify-admin/   # Server-seitige Admin-Verifizierung
+└── config.toml         # Supabase Konfiguration
+```
 
-Follow these steps:
+## 🔒 Sicherheitsarchitektur
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Rollenmodell
+- **Admin**: Vollzugriff inkl. Benutzerverwaltung
+- **Staff**: Kann Speisekarte, Galerie und Einstellungen bearbeiten
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Sicherheitsschichten
+1. **Client-seitig**: UI-basierte Zugriffsbeschränkung (UX)
+2. **RLS-Policies**: Datenbankebene mit `is_admin_or_staff()` Funktion
+3. **Edge Functions**: Server-seitige Admin-Verifizierung via `verify-admin`
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Fehlermeldungen
+Technische Fehler werden über `src/lib/errorMessages.ts` in benutzerfreundliche deutsche Meldungen übersetzt, während Details für Debugging in der Konsole protokolliert werden.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## 🔧 Entwicklung
+
+### Lokale Entwicklung
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Tests ausführen
+```bash
+npm test
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📝 Changelog
 
-**Use GitHub Codespaces**
+### Version 1.2.0 (2026-01-30)
+**Sicherheitsverbesserungen**
+- Passwort-Mindestlänge von 6 auf 8 Zeichen erhöht
+- Neue Error-Mapping-Utility für sichere Fehlermeldungen
+- Alle Admin-Seiten verwenden jetzt benutzerfreundliche Fehlermeldungen
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Version 1.1.0 (2026-01-29)
+**Performance-Optimierungen**
+- Preconnect-Hints für Supabase API und Google Fonts
+- Hero-Bild mit `fetchPriority="high"` für schnelleres LCP
+- Galerie-Bilder mit Lazy-Loading und expliziten Dimensionen
 
-## What technologies are used for this project?
+### Version 1.0.0 (2026-01-28)
+**Initiale Version**
+- Öffentliche Restaurant-Website
+- Admin-Dashboard mit Speisekarten-Verwaltung
+- Galerie-Verwaltung mit Bildupload
+- Benutzerverwaltung mit Rollenmodell
+- Server-seitige Admin-Verifizierung
 
-This project is built with:
+## 📄 Lizenz
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Dieses Projekt wurde mit [Lovable](https://lovable.dev) erstellt.
