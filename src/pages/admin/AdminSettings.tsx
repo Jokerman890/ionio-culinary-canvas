@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Save } from 'lucide-react';
+import { getUserFriendlyError } from '@/lib/errorMessages';
 
 interface DayHours {
   open: string;
@@ -133,8 +134,9 @@ export default function AdminSettings() {
       }
 
       toast({ title: 'Einstellungen gespeichert' });
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminSettings.saveSettings');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }

@@ -12,6 +12,7 @@ import { useServerAuth } from '@/hooks/useServerAuth';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Trash2, Loader2, Shield, User, ShieldAlert } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { getUserFriendlyError } from '@/lib/errorMessages';
 
 interface UserRole {
   id: string;
@@ -64,8 +65,8 @@ export default function AdminUsers() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      toast({ title: 'Passwort muss mindestens 6 Zeichen haben', variant: 'destructive' });
+    if (newPassword.length < 8) {
+      toast({ title: 'Passwort muss mindestens 8 Zeichen haben', variant: 'destructive' });
       return;
     }
 
@@ -99,10 +100,8 @@ export default function AdminUsers() {
       setNewPassword('');
       setNewRole('staff');
       fetchUsers();
-    } catch (error: any) {
-      const message = error.message === 'User already registered' 
-        ? 'Diese E-Mail ist bereits registriert'
-        : error.message;
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminUsers.createUser');
       toast({ title: 'Fehler', description: message, variant: 'destructive' });
     } finally {
       setSaving(false);
@@ -126,8 +125,9 @@ export default function AdminUsers() {
       if (error) throw error;
       toast({ title: 'Berechtigung entfernt' });
       fetchUsers();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminUsers.deleteUser');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     }
   };
 

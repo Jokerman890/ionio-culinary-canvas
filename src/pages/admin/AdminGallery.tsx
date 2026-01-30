@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Loader2, Upload, Eye, EyeOff } from 'lucide-react';
+import { getUserFriendlyError } from '@/lib/errorMessages';
 
 interface GalleryImage {
   id: string;
@@ -106,9 +107,9 @@ export default function AdminGallery() {
 
       toast({ title: 'Bilder hochgeladen' });
       fetchImages();
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      toast({ title: 'Upload fehlgeschlagen', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminGallery.handleFileUpload');
+      toast({ title: 'Upload fehlgeschlagen', description: message, variant: 'destructive' });
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -141,8 +142,9 @@ export default function AdminGallery() {
       toast({ title: 'Bild aktualisiert' });
       setEditDialogOpen(false);
       fetchImages();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminGallery.saveEdit');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -157,8 +159,9 @@ export default function AdminGallery() {
 
       if (error) throw error;
       fetchImages();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminGallery.toggleVisibility');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     }
   };
 
@@ -182,8 +185,9 @@ export default function AdminGallery() {
       if (error) throw error;
       toast({ title: 'Bild gelöscht' });
       fetchImages();
-    } catch (error: any) {
-      toast({ title: 'Fehler', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminGallery.deleteImage');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
     }
   };
 
