@@ -35,22 +35,44 @@ export function AdminWeeklyOffers() {
   async function fetchOffers() {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: initialData, error } = await supabase
         .from('weekly_offers')
         .select('*')
         .order('position');
 
       if (error) throw error;
 
-      // Ensure we have all 3 positions
-      const offersMap = new Map(data?.map(o => [o.position, o]));
-      const completeOffers: WeeklyOffer[] = [];
-      
-      for (let i = 1; i <= 3; i++) {
-        if (offersMap.has(i)) {
-          completeOffers.push(offersMap.get(i)!);
+      let data = initialData || [];
+
+      const existingPositions = new Set(data.map(offer => offer.position));
+      const missingPositions = [1, 2, 3].filter(position => !existingPositions.has(position));
+
+      if (missingPositions.length > 0) {
+        const placeholders = missingPositions.map(position => ({
+          position,
+          name: `Wochenangebot ${position}`,
+          description: null,
+          price: 0,
+          original_price: null,
+          is_active: false,
+        }));
+
+        const { data: inserted, error: insertError } = await supabase
+          .from('weekly_offers')
+          .insert(placeholders)
+          .select('*');
+
+        if (insertError) {
+          toast({ title: 'Fehler beim Anlegen der Wochenangebote', variant: 'destructive' });
+        } else if (inserted) {
+          data = [...data, ...inserted];
         }
       }
+
+      const offersMap = new Map(data.map(offer => [offer.position, offer]));
+      const completeOffers = [1, 2, 3]
+        .map(position => offersMap.get(position))
+        .filter((offer): offer is WeeklyOffer => Boolean(offer));
 
       setOffers(completeOffers);
     } catch (error) {

@@ -4,9 +4,19 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.3.0] - 2026-01-31
+
+### ✨ Verbesserungen
+- 🧪 **UI-Tests hinzugefügt**: Speisekarte & Wochenangebote werden über React Testing Library abgedeckt
+- 🧾 **Menü-Datenprüfung**: Neues Script `test:menu-data` prüft Allergencodes in `menuData.ts`
+- 🚨 **Fehleranzeige in der Speisekarte**: Sichtbarer Hinweis mit Retry-Button bei Ladefehlern
+- 🔁 **Wochenangebote stabilisiert**: Fehlende Plätze (1–3) werden automatisch angelegt
+- 🧭 **Admin-Reihenfolge**: Schnellsteuerung für Hoch/Runter bei Gerichten
+- 🧼 **Allergen-Validierung**: Erlaubte Codes werden angezeigt, ungültige werden abgefangen
+
 ## [1.2.0] - 2026-01-30
 
-### Sicherheit
+### 🔐 Sicherheit
 - **Passwort-Policy verstärkt**: Mindestlänge von 6 auf 8 Zeichen erhöht in der Benutzerverwaltung
 - **Sichere Fehlermeldungen**: Neue Utility `src/lib/errorMessages.ts` übersetzt technische Fehler in benutzerfreundliche deutsche Meldungen
 - **Error-Handling verbessert**: Alle Admin-Seiten verwenden jetzt das zentrale Error-Mapping:
@@ -16,13 +26,13 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
   - `AdminMenu.tsx` - Kategorien und Gerichte verwalten
   - `AdminWeeklyOffers.tsx` - Wochenangebote speichern
 
-### Geändert
+### 🛠️ Geändert
 - Technische Fehlermeldungen werden nicht mehr direkt an Benutzer angezeigt
 - Vollständige Fehlerdetails werden in der Browser-Konsole protokolliert (für Debugging)
 
 ## [1.1.0] - 2026-01-29
 
-### Performance
+### ⚡ Performance
 - **Preconnect-Hints hinzugefügt**: 
   - Supabase API (`uuohpodkgblvjrhvfldl.supabase.co`)
   - Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`)
@@ -34,13 +44,13 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
   - `loading="lazy"` für Bilder außerhalb des Viewports
   - Explizite `width` und `height` Attribute zur Vermeidung von Layout Shifts (CLS)
 
-### Verbessert
+### ✅ Verbessert
 - Network Dependency Tree optimiert (SEO Audit Score verbessert)
 - Kritische Request-Ketten reduziert
 
 ## [1.0.0] - 2026-01-28
 
-### Hinzugefügt
+### ➕ Hinzugefügt
 - **Öffentliche Website**
   - Hero-Bereich mit animiertem Hintergrund und Call-to-Action
   - Interaktive Speisekarte mit Kategorien und Filterung
@@ -69,7 +79,7 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
   - Storage-Bucket für Galerie-Bilder
   - Edge Function: `verify-admin`
 
-### Technische Details
+### 🧩 Technische Details
 - React 18 mit TypeScript
 - Vite als Build-Tool
 - Tailwind CSS mit shadcn/ui Komponenten
