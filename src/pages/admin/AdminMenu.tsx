@@ -11,10 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Loader2, GripVertical, Star, UtensilsCrossed } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Star, UtensilsCrossed, ArrowUp, ArrowDown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AdminWeeklyOffers } from '@/components/admin/AdminWeeklyOffers';
 import { getUserFriendlyError } from '@/lib/errorMessages';
+import { allergenInfo } from '@/data/menuData';
 
 interface Category {
   id: string;
@@ -61,6 +62,19 @@ export default function AdminMenu() {
   const [itemCategoryId, setItemCategoryId] = useState('');
   
   const [saving, setSaving] = useState(false);
+  const [reorderingId, setReorderingId] = useState<string | null>(null);
+
+  const allergenCodes = Object.keys(allergenInfo);
+  const allergenCodeList = allergenCodes.map(code => code.toUpperCase()).join(', ');
+
+  const parseAllergens = (value: string) =>
+    value
+      .split(',')
+      .map(a => a.trim().toLowerCase())
+      .filter(Boolean);
+
+  const getInvalidAllergens = (value: string) =>
+    parseAllergens(value).filter(code => !allergenCodes.includes(code));
 
   useEffect(() => {
     fetchData();
@@ -193,10 +207,16 @@ export default function AdminMenu() {
       return;
     }
 
-    const allergensArray = itemAllergens
-      .split(',')
-      .map(a => a.trim())
-      .filter(a => a);
+    const allergensArray = parseAllergens(itemAllergens);
+    const invalidAllergens = allergensArray.filter(code => !allergenCodes.includes(code));
+    if (invalidAllergens.length > 0) {
+      toast({
+        title: 'Ungültige Allergen-Codes',
+        description: `Bitte prüfen: ${invalidAllergens.map(code => code.toUpperCase()).join(', ')}`,
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setSaving(true);
     try {
@@ -266,9 +286,52 @@ export default function AdminMenu() {
     }
   };
 
+  const moveItem = async (item: MenuItem, direction: 'up' | 'down') => {
+    if (!selectedCategory) return;
+
+    const categoryItems = menuItems
+      .filter(current => current.category_id === selectedCategory)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+    const currentIndex = categoryItems.findIndex(current => current.id === item.id);
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex === -1 || targetIndex < 0 || targetIndex >= categoryItems.length) {
+      return;
+    }
+
+    const targetItem = categoryItems[targetIndex];
+    setReorderingId(item.id);
+
+    try {
+      const { error: updateCurrentError } = await supabase
+        .from('menu_items')
+        .update({ sort_order: targetItem.sort_order })
+        .eq('id', item.id);
+
+      if (updateCurrentError) throw updateCurrentError;
+
+      const { error: updateTargetError } = await supabase
+        .from('menu_items')
+        .update({ sort_order: item.sort_order })
+        .eq('id', targetItem.id);
+
+      if (updateTargetError) throw updateTargetError;
+
+      fetchData();
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminMenu.moveItem');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
+    } finally {
+      setReorderingId(null);
+    }
+  };
+
   const filteredItems = selectedCategory 
     ? menuItems.filter(item => item.category_id === selectedCategory)
     : menuItems;
+
+  const invalidAllergens = getInvalidAllergens(itemAllergens);
 
   if (loading) {
     return (
@@ -359,10 +422,31 @@ export default function AdminMenu() {
                     </CardContent>
                   </Card>
                 ) : (
-                  filteredItems.map(item => (
+                  filteredItems.map((item, index) => (
                     <Card key={item.id} className={`border-border/50 transition-all duration-short hover:border-gold/30 ${!item.is_available ? 'opacity-60' : ''}`}>
                       <CardContent className="py-4 flex items-center gap-4">
-                        <GripVertical className="w-5 h-5 text-muted-foreground/50 cursor-grab" />
+                        <div className="flex flex-col items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => moveItem(item, 'up')}
+                            disabled={!selectedCategory || index === 0 || reorderingId === item.id}
+                            aria-label="Gericht nach oben verschieben"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => moveItem(item, 'down')}
+                            disabled={!selectedCategory || index === filteredItems.length - 1 || reorderingId === item.id}
+                            aria-label="Gericht nach unten verschieben"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -521,6 +605,14 @@ export default function AdminMenu() {
                 onChange={(e) => setItemAllergens(e.target.value)}
                 placeholder="z.B. A, G, L"
               />
+              {invalidAllergens.length > 0 && (
+                <p className="text-xs text-destructive">
+                  Unbekannte Codes: {invalidAllergens.map(code => code.toUpperCase()).join(', ')}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Erlaubte Codes: {allergenCodeList}
+              </p>
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="item-veg">Vegetarisch</Label>

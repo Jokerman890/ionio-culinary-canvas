@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useMenuData } from '@/hooks/useMenuData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Leaf, Star, Info, Loader2 } from 'lucide-react';
+import { AlertTriangle, Leaf, Star, Info, Loader2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -15,7 +17,7 @@ import { menuCategories as fallbackCategories, allergenInfo } from '@/data/menuD
 
 export function MenuSection() {
   const { ref: titleRef, isRevealed: titleRevealed } = useScrollReveal<HTMLDivElement>();
-  const { itemsByCategory, weeklyOffers, loading, error } = useMenuData();
+  const { itemsByCategory, weeklyOffers, loading, error, refetch } = useMenuData();
   const [activeCategory, setActiveCategory] = useState<string>('');
 
   // Use database data if available, otherwise fallback to static data
@@ -50,6 +52,22 @@ export function MenuSection() {
           </div>
         ) : (
           <>
+            {error && (
+              <Alert variant="destructive" className="mb-8 max-w-3xl mx-auto text-left">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Speisekarte konnte nicht geladen werden</AlertTitle>
+                <AlertDescription className="space-y-3">
+                  <p>
+                    Beim Laden der aktuellen Speisekarte ist ein Fehler aufgetreten. Wir zeigen
+                    weiterhin die Standardauswahl an.
+                  </p>
+                  <Button variant="outline" size="sm" onClick={refetch}>
+                    Erneut versuchen
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Weekly Offers */}
             <WeeklyOffersDisplay offers={weeklyOffers} />
 

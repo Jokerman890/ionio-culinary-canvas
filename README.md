@@ -86,25 +86,34 @@ npm test
 
 ## 📝 Changelog
 
+### Version 1.3.0 (2026-01-31)
+**✨ Verbesserungen**
+- 🧪 **UI-Tests** für Speisekarte und Wochenangebote ergänzt
+- 🧾 **Menü-Datenprüfung** per Script (`test:menu-data`) für Allergencodes
+- 🚨 **Fehleranzeige** mit Retry-Button in der öffentlichen Speisekarte
+- 🔁 **Wochenangebote**: fehlende Plätze werden automatisch angelegt
+- 🧭 **Admin-Sortierung**: schnelle Hoch/Runter-Reihenfolge bei Gerichten
+- 🧼 **Allergen-Validierung** mit erlaubten Codes in der Admin-Eingabe
+
 ### Version 1.2.0 (2026-01-30)
-**Sicherheitsverbesserungen**
-- Passwort-Mindestlänge von 6 auf 8 Zeichen erhöht
-- Neue Error-Mapping-Utility für sichere Fehlermeldungen
-- Alle Admin-Seiten verwenden jetzt benutzerfreundliche Fehlermeldungen
+**🔐 Sicherheitsverbesserungen**
+- 🔑 Passwort-Mindestlänge von 6 auf 8 Zeichen erhöht
+- 🧩 Neue Error-Mapping-Utility für sichere Fehlermeldungen
+- 🧑‍💻 Alle Admin-Seiten verwenden jetzt benutzerfreundliche Fehlermeldungen
 
 ### Version 1.1.0 (2026-01-29)
-**Performance-Optimierungen**
-- Preconnect-Hints für Supabase API und Google Fonts
-- Hero-Bild mit `fetchPriority="high"` für schnelleres LCP
-- Galerie-Bilder mit Lazy-Loading und expliziten Dimensionen
+**⚡ Performance-Optimierungen**
+- 🔗 Preconnect-Hints für Supabase API und Google Fonts
+- 🖼️ Hero-Bild mit `fetchPriority="high"` für schnelleres LCP
+- 🧭 Galerie-Bilder mit Lazy-Loading und expliziten Dimensionen
 
 ### Version 1.0.0 (2026-01-28)
-**Initiale Version**
-- Öffentliche Restaurant-Website
-- Admin-Dashboard mit Speisekarten-Verwaltung
-- Galerie-Verwaltung mit Bildupload
-- Benutzerverwaltung mit Rollenmodell
-- Server-seitige Admin-Verifizierung
+**🚀 Initiale Version**
+- 🌍 Öffentliche Restaurant-Website
+- 🛠️ Admin-Dashboard mit Speisekarten-Verwaltung
+- 🖼️ Galerie-Verwaltung mit Bildupload
+- 👥 Benutzerverwaltung mit Rollenmodell
+- ✅ Server-seitige Admin-Verifizierung
 
 ## 📄 Lizenz
 
