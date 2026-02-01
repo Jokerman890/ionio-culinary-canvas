@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,24 +49,71 @@ const defaultHours: DayHours = {
   closed: false,
 };
 
+const dayHoursSchema = z.object({
+  open: z.string().min(1, 'Erforderlich'),
+  close: z.string().min(1, 'Erforderlich'),
+  evening_open: z.string().min(1, 'Erforderlich'),
+  evening_close: z.string().min(1, 'Erforderlich'),
+  closed: z.boolean(),
+});
+
+const addressSchema = z.object({
+  street: z.string().trim().min(1, 'Straße erforderlich'),
+  zip: z.string().trim().min(3, 'PLZ erforderlich'),
+  city: z.string().trim().min(1, 'Stadt erforderlich'),
+});
+
+const openingHoursSchema = z.object({
+  monday: dayHoursSchema,
+  tuesday: dayHoursSchema,
+  wednesday: dayHoursSchema,
+  thursday: dayHoursSchema,
+  friday: dayHoursSchema,
+  saturday: dayHoursSchema,
+  sunday: dayHoursSchema,
+});
+
+const settingsSchema = z.object({
+  phone: z.string().trim().min(5, 'Telefonnummer erforderlich'),
+  address: addressSchema,
+  openingHours: openingHoursSchema,
+});
+
+type SettingsFormValues = z.input<typeof settingsSchema>;
+
 export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState({ street: '', zip: '', city: '' });
-  const [openingHours, setOpeningHours] = useState<OpeningHours>({
-    monday: { ...defaultHours },
-    tuesday: { ...defaultHours, closed: true },
-    wednesday: { ...defaultHours },
-    thursday: { ...defaultHours },
-    friday: { ...defaultHours },
-    saturday: { ...defaultHours },
-    sunday: { ...defaultHours },
+  const {
+    control,
+    register,
+    reset,
+    getValues,
+    trigger,
+    watch,
+    formState: { errors },
+  } = useForm<SettingsFormValues>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      phone: '',
+      address: { street: '', zip: '', city: '' },
+      openingHours: {
+        monday: { ...defaultHours },
+        tuesday: { ...defaultHours, closed: true },
+        wednesday: { ...defaultHours },
+        thursday: { ...defaultHours },
+        friday: { ...defaultHours },
+        saturday: { ...defaultHours },
+        sunday: { ...defaultHours },
+      },
+    },
   });
 
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  const watchedOpeningHours = watch('openingHours');
 
   async function fetchSettings() {
     setLoading(true);
@@ -74,15 +124,24 @@ export default function AdminSettings() {
 
       if (error) throw error;
 
+      const currentValues = getValues();
+      const nextValues: SettingsFormValues = {
+        phone: currentValues.phone,
+        address: currentValues.address,
+        openingHours: currentValues.openingHours,
+      };
+
       data?.forEach(setting => {
         if (setting.key === 'phone') {
-          setPhone(JSON.parse(JSON.stringify(setting.value)));
+          nextValues.phone = String(setting.value ?? '');
         } else if (setting.key === 'address') {
-          setAddress(setting.value as any);
+          nextValues.address = setting.value as SettingsFormValues['address'];
         } else if (setting.key === 'opening_hours') {
-          setOpeningHours(setting.value as any);
+          nextValues.openingHours = setting.value as SettingsFormValues['openingHours'];
         }
       });
+
+      reset(nextValues);
     } catch (error) {
       console.error('Error fetching settings:', error);
       toast({ title: 'Fehler beim Laden', variant: 'destructive' });
@@ -91,24 +150,21 @@ export default function AdminSettings() {
     }
   }
 
-  const updateDayHours = (day: keyof OpeningHours, field: keyof DayHours, value: string | boolean) => {
-    setOpeningHours(prev => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [field]: value,
-      },
-    }));
-  };
-
   const saveSettings = async () => {
     setSaving(true);
     try {
+      const isValid = await trigger();
+      if (!isValid) {
+        toast({ title: 'Ungültige Eingaben', variant: 'destructive' });
+        return;
+      }
+
+      const values = settingsSchema.parse(getValues());
       // Update all settings using upsert
       const updates = [
-        { key: 'phone', value: phone as unknown },
-        { key: 'address', value: address as unknown },
-        { key: 'opening_hours', value: openingHours as unknown },
+        { key: 'phone', value: values.phone as unknown },
+        { key: 'address', value: values.address as unknown },
+        { key: 'opening_hours', value: values.openingHours as unknown },
       ];
 
       for (const update of updates) {
@@ -122,13 +178,13 @@ export default function AdminSettings() {
         if (existing) {
           const { error } = await supabase
             .from('restaurant_settings')
-            .update({ value: update.value as any })
+            .update({ value: update.value })
             .eq('key', update.key);
           if (error) throw error;
         } else {
           const { error } = await supabase
             .from('restaurant_settings')
-            .insert({ key: update.key, value: update.value as any });
+            .insert({ key: update.key, value: update.value });
           if (error) throw error;
         }
       }
@@ -184,38 +240,46 @@ export default function AdminSettings() {
               <Label htmlFor="phone">Telefonnummer</Label>
               <Input
                 id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                {...register('phone')}
                 placeholder="04222 77 411 10"
               />
+              {errors.phone && (
+                <p className="text-xs text-destructive">{errors.phone.message}</p>
+              )}
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="street">Straße</Label>
                 <Input
                   id="street"
-                  value={address.street}
-                  onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                  {...register('address.street')}
                   placeholder="Mühlenstr. 23"
                 />
+                {errors.address?.street && (
+                  <p className="text-xs text-destructive">{errors.address.street.message}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="zip">PLZ</Label>
                 <Input
                   id="zip"
-                  value={address.zip}
-                  onChange={(e) => setAddress({ ...address, zip: e.target.value })}
+                  {...register('address.zip')}
                   placeholder="27777"
                 />
+                {errors.address?.zip && (
+                  <p className="text-xs text-destructive">{errors.address.zip.message}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="city">Stadt</Label>
                 <Input
                   id="city"
-                  value={address.city}
-                  onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                  {...register('address.city')}
                   placeholder="Ganderkesee"
                 />
+                {errors.address?.city && (
+                  <p className="text-xs text-destructive">{errors.address.city.message}</p>
+                )}
               </div>
             </div>
           </CardContent>
@@ -227,53 +291,68 @@ export default function AdminSettings() {
             <CardTitle className="font-serif">Öffnungszeiten</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {(Object.keys(dayLabels) as Array<keyof OpeningHours>).map(day => (
+            {(Object.keys(dayLabels) as Array<keyof OpeningHours>).map(day => {
+              const dayState = watchedOpeningHours?.[day];
+              const isClosed = dayState?.closed ?? false;
+              return (
               <div key={day} className="flex items-center gap-4 py-2 border-b border-border/30 last:border-0">
                 <div className="w-28 font-medium">{dayLabels[day]}</div>
                 
                 <div className="flex items-center gap-2">
-                  <Switch
-                    checked={!openingHours[day].closed}
-                    onCheckedChange={(checked) => updateDayHours(day, 'closed', !checked)}
+                  <Controller
+                    control={control}
+                    name={`openingHours.${day}.closed` as const}
+                    render={({ field }) => (
+                      <Switch checked={!field.value} onCheckedChange={(checked) => field.onChange(!checked)} />
+                    )}
                   />
                   <span className="text-sm text-muted-foreground">
-                    {openingHours[day].closed ? 'Ruhetag' : 'Geöffnet'}
+                    {isClosed ? 'Ruhetag' : 'Geöffnet'}
                   </span>
                 </div>
 
-                {!openingHours[day].closed && (
+                {!isClosed && (
                   <div className="flex items-center gap-2 flex-1">
                     <Input
                       type="time"
-                      value={openingHours[day].open}
-                      onChange={(e) => updateDayHours(day, 'open', e.target.value)}
+                      {...register(`openingHours.${day}.open` as const)}
                       className="w-28"
                     />
+                    {errors.openingHours?.[day]?.open && (
+                      <p className="text-xs text-destructive">{errors.openingHours[day]?.open?.message}</p>
+                    )}
                     <span>–</span>
                     <Input
                       type="time"
-                      value={openingHours[day].close}
-                      onChange={(e) => updateDayHours(day, 'close', e.target.value)}
+                      {...register(`openingHours.${day}.close` as const)}
                       className="w-28"
                     />
+                    {errors.openingHours?.[day]?.close && (
+                      <p className="text-xs text-destructive">{errors.openingHours[day]?.close?.message}</p>
+                    )}
                     <span className="text-muted-foreground">&</span>
                     <Input
                       type="time"
-                      value={openingHours[day].evening_open}
-                      onChange={(e) => updateDayHours(day, 'evening_open', e.target.value)}
+                      {...register(`openingHours.${day}.evening_open` as const)}
                       className="w-28"
                     />
+                    {errors.openingHours?.[day]?.evening_open && (
+                      <p className="text-xs text-destructive">{errors.openingHours[day]?.evening_open?.message}</p>
+                    )}
                     <span>–</span>
                     <Input
                       type="time"
-                      value={openingHours[day].evening_close}
-                      onChange={(e) => updateDayHours(day, 'evening_close', e.target.value)}
+                      {...register(`openingHours.${day}.evening_close` as const)}
                       className="w-28"
                     />
+                    {errors.openingHours?.[day]?.evening_close && (
+                      <p className="text-xs text-destructive">{errors.openingHours[day]?.evening_close?.message}</p>
+                    )}
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       </div>

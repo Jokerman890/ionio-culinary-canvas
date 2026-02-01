@@ -7,13 +7,15 @@ vi.mock("@/hooks/useScrollReveal", () => ({
 }));
 
 const mockRefetch = vi.fn();
-const useMenuDataMock = vi.fn(() => ({
-  itemsByCategory: [],
-  weeklyOffers: [],
-  loading: false,
-  error: null,
-  refetch: mockRefetch,
-}));
+const useMenuDataMock = vi.hoisted(() =>
+  vi.fn(() => ({
+    itemsByCategory: [],
+    weeklyOffers: [],
+    loading: false,
+    error: null,
+    refetch: mockRefetch,
+  })),
+);
 
 vi.mock("@/hooks/useMenuData", () => ({
   useMenuData: useMenuDataMock,

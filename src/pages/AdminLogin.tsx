@@ -16,6 +16,51 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const rateLimitKey = 'adminLoginRateLimit';
+  const maxAttempts = 5;
+  const windowMs = 5 * 60 * 1000;
+
+  const readRateLimitState = () => {
+    try {
+      const raw = localStorage.getItem(rateLimitKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { count?: number; firstAttemptAt?: number };
+      if (typeof parsed.count !== 'number' || typeof parsed.firstAttemptAt !== 'number') return null;
+      return { count: parsed.count, firstAttemptAt: parsed.firstAttemptAt };
+    } catch {
+      return null;
+    }
+  };
+
+  const writeRateLimitState = (state: { count: number; firstAttemptAt: number } | null) => {
+    try {
+      if (!state) {
+        localStorage.removeItem(rateLimitKey);
+        return;
+      }
+      localStorage.setItem(rateLimitKey, JSON.stringify(state));
+    } catch {
+      // localStorage kann in seltenen Fällen nicht verfügbar sein (z.B. Privacy-Modus)
+    }
+  };
+
+  const getRateLimitInfo = () => {
+    const now = Date.now();
+    const state = readRateLimitState();
+    if (!state) {
+      return { state: null, isLimited: false, remainingMs: 0 };
+    }
+
+    const elapsed = now - state.firstAttemptAt;
+    if (elapsed > windowMs) {
+      writeRateLimitState(null);
+      return { state: null, isLimited: false, remainingMs: 0 };
+    }
+
+    const remainingMs = windowMs - elapsed;
+    return { state, isLimited: state.count >= maxAttempts, remainingMs };
+  };
+
   useEffect(() => {
     if (!loading && isAuthenticated && (role === 'admin' || role === 'staff')) {
       navigate('/admin');
@@ -34,20 +79,51 @@ export default function AdminLogin() {
       return;
     }
 
+    const rateLimitInfo = getRateLimitInfo();
+    if (rateLimitInfo.isLimited) {
+      const remainingMinutes = Math.max(1, Math.ceil(rateLimitInfo.remainingMs / 60000));
+      toast({
+        title: 'Zu viele Anmeldeversuche',
+        description: `Bitte warten Sie ${remainingMinutes} Minute(n), bevor Sie es erneut versuchen.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
+    // Hinweis: Client-seitiges Rate-Limit ist umgehbar; server-seitig sollte ein Limit
+    // z.B. via Supabase Edge Function (Auth-Proxy) oder API-Gateway ergänzt werden.
     const { error } = await signIn(email, password);
     
     if (error) {
-      toast({
-        title: 'Anmeldung fehlgeschlagen',
-        description: error.message === 'Invalid login credentials' 
-          ? 'Ungültige E-Mail oder Passwort.' 
-          : error.message,
-        variant: 'destructive',
-      });
+      const now = Date.now();
+      const nextState = rateLimitInfo.state
+        ? { count: rateLimitInfo.state.count + 1, firstAttemptAt: rateLimitInfo.state.firstAttemptAt }
+        : { count: 1, firstAttemptAt: now };
+      writeRateLimitState(nextState);
+
+      if (nextState.count >= maxAttempts) {
+        toast({
+          title: 'Zu viele Anmeldeversuche',
+          description: 'Bitte warten Sie 5 Minuten, bevor Sie es erneut versuchen.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Anmeldung fehlgeschlagen',
+          description:
+            error.message === 'Invalid login credentials'
+              ? 'Ungültige E-Mail oder Passwort.'
+              : error.message,
+          variant: 'destructive',
+        });
+      }
       setIsSubmitting(false);
+      return;
     }
+
+    writeRateLimitState(null);
   };
 
   if (loading) {

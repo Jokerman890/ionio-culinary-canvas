@@ -1,14 +1,21 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const allowedOrigins = ['https://ionio-ganderkesee.de', 'http://localhost:5173']
+const defaultOrigin = allowedOrigins[0]
+
+const resolveOrigin = (origin: string | null) =>
+  origin && allowedOrigins.includes(origin) ? origin : defaultOrigin
+
+const corsHeaders = (origin: string | null) => ({
+  'Access-Control-Allow-Origin': resolveOrigin(origin),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  Vary: 'Origin',
+})
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders(req.headers.get('Origin')) })
   }
 
   try {
@@ -17,7 +24,10 @@ Deno.serve(async (req) => {
       console.log('Missing or invalid authorization header')
       return new Response(
         JSON.stringify({ isAdmin: false, error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 401,
+          headers: { ...corsHeaders(req.headers.get('Origin')), 'Content-Type': 'application/json' },
+        }
       )
     }
 
@@ -34,7 +44,10 @@ Deno.serve(async (req) => {
       console.log('Failed to verify token:', claimsError?.message)
       return new Response(
         JSON.stringify({ isAdmin: false, error: 'Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 401,
+          headers: { ...corsHeaders(req.headers.get('Origin')), 'Content-Type': 'application/json' },
+        }
       )
     }
 
@@ -49,7 +62,10 @@ Deno.serve(async (req) => {
       console.error('Error checking admin role:', roleError.message)
       return new Response(
         JSON.stringify({ isAdmin: false, error: 'Failed to verify role' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 500,
+          headers: { ...corsHeaders(req.headers.get('Origin')), 'Content-Type': 'application/json' },
+        }
       )
     }
 
@@ -57,13 +73,19 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ isAdmin: hasAdminRole === true, userId }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 200,
+        headers: { ...corsHeaders(req.headers.get('Origin')), 'Content-Type': 'application/json' },
+      }
     )
   } catch (error) {
     console.error('Unexpected error:', error)
     return new Response(
       JSON.stringify({ isAdmin: false, error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 500,
+        headers: { ...corsHeaders(req.headers.get('Origin')), 'Content-Type': 'application/json' },
+      }
     )
   }
 })

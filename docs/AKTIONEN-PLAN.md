@@ -1,4 +1,4 @@
-# Aktionsplan: IONIO Culinary Canvas - Risikobehebung und Qualitätssteigerung
+docs\AKTIONEN-PLAN.md# Aktionsplan: IONIO Culinary Canvas - Risikobehebung und Qualitätssteigerung
 
 **Erstellungsdatum:** 1. Februar 2026
 **Basierend auf:** [docs/PROJEKTBERICHT.md:1]

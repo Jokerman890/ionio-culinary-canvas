@@ -6,6 +6,8 @@ Dieses Dokument beschreibt die Sicherheitsarchitektur der Ionio Restaurant Websi
 
 Die Anwendung implementiert ein mehrschichtiges Sicherheitsmodell:
 
+Secrets und Zugangsdaten (z.B. .env-Dateien) dürfen nicht in das Repository committed werden und müssen lokal bzw. in sicheren Secret-Stores verwaltet werden.
+
 1. **Client-seitige Zugriffskontrolle** (UX-Layer)
 2. **Row-Level Security** (Datenbankebene)
 3. **Edge Functions** (Server-seitige Validierung)

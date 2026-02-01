@@ -4,6 +4,15 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.3.2] - 2026-02-01
+
+### ✅ Sprint 2
+- any-Typen eliminiert
+- Admin Code-Splitting
+- Zod-Validierung erweitert
+- Tests erweitert/verbessert
+- Test-Setup stabilisiert
+
 ## [1.3.1] - 2026-02-01
 
 ### 📝 Dokumentation

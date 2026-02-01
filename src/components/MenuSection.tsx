@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { useMenuData } from '@/hooks/useMenuData';
+import { useMenuData, type MenuCategory, type MenuItem } from '@/hooks/useMenuData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/tooltip';
 import { WeeklyOffersDisplay } from '@/components/menu/WeeklyOffersDisplay';
 import { menuCategories as fallbackCategories, allergenInfo } from '@/data/menuData';
+
+type MenuCategoryWithItems = MenuCategory & { items: MenuItem[] };
 
 export function MenuSection() {
   const { ref: titleRef, isRevealed: titleRevealed } = useScrollReveal<HTMLDivElement>();
@@ -111,7 +113,7 @@ export function MenuSection() {
 }
 
 // Component for database-driven menu items
-function DatabaseMenuCategory({ category }: { category: { id: string; name: string; description: string | null; items: any[] } }) {
+function DatabaseMenuCategory({ category }: { category: MenuCategoryWithItems }) {
   return (
     <div className="animate-fade-in">
       {category.description && (
@@ -129,7 +131,7 @@ function DatabaseMenuCategory({ category }: { category: { id: string; name: stri
   );
 }
 
-function DatabaseMenuItemCard({ item, index }: { item: any; index: number }) {
+function DatabaseMenuItemCard({ item, index }: { item: MenuItem; index: number }) {
   return (
     <div
       className="menu-item-card group flex justify-between items-start gap-4 p-4 md:p-5 rounded-lg bg-card border border-border/50 hover:border-gold/30 hover:shadow-md transition-all duration-short"
