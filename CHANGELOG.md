@@ -4,6 +4,13 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.3.1] - 2026-02-01
+
+### 📝 Dokumentation
+- Projektbericht erstellt
+- Aktionsplan erstellt
+- MD060 in Projektbericht behoben
+
 ## [1.3.0] - 2026-01-31
 
 ### ✨ Verbesserungen
