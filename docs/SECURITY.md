@@ -114,6 +114,41 @@ Authorization: Bearer <jwt_token>
 const { isAdmin } = useServerAuth();
 ```
 
+### login-rate-limited
+
+Login-Proxy mit serverseitigem Rate-Limiting (Schutz gegen Brute-Force-Angriffe).
+
+**Endpoint:** `POST /functions/v1/login-rate-limited`
+
+**Request:**
+```json
+{
+  "email": "admin@ionio-ganderkesee.de",
+  "password": "••••••••"
+}
+```
+
+**Rate-Limit:** 5 Versuche pro 5 Minuten (pro E-Mail + IP).
+
+**Response (Erfolg):**
+```json
+{
+  "data": {
+    "session": { "access_token": "..." },
+    "user": { "id": "uuid" }
+  }
+}
+```
+
+**Response (Limit erreicht):**
+```json
+{
+  "error": "rate_limited",
+  "message": "Zu viele Anmeldeversuche. Bitte später erneut versuchen.",
+  "retryAfterMs": 300000
+}
+```
+
 ## Sichere Fehlermeldungen
 
 Technische Fehlermeldungen werden über `src/lib/errorMessages.ts` gefiltert:

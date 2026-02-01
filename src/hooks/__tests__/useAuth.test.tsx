@@ -11,9 +11,11 @@ vi.mock("@/integrations/supabase/client", () => ({
     auth: {
       onAuthStateChange: (...args: unknown[]) => mockOnAuthStateChange(...args),
       getSession: (...args: unknown[]) => mockGetSession(...args),
-      signInWithPassword: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
+    },
+    functions: {
+      invoke: vi.fn(),
     },
     from: (...args: unknown[]) => mockFrom(...args),
   },

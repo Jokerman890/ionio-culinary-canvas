@@ -16,7 +16,7 @@ export function useAuth() {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Defer role fetch with setTimeout
         if (session?.user) {
           setTimeout(() => {
@@ -65,9 +65,21 @@ export function useAuth() {
     }
   };
 
+  /* temp debug: bypass edge function */
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    const { data, error } = await supabase.functions.invoke('login-rate-limited', {
+      body: { email, password },
+    });
+
+    if (error) {
+      return { error };
+    }
+
+    if (data?.error) {
+      return { error: new Error(data.error) };
+    }
+
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string) => {
