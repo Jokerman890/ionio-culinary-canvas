@@ -178,13 +178,13 @@ export default function AdminSettings() {
         if (existing) {
           const { error } = await supabase
             .from('restaurant_settings')
-            .update({ value: update.value })
+            .update({ value: update.value as import('@/integrations/supabase/types').Json })
             .eq('key', update.key);
           if (error) throw error;
         } else {
           const { error } = await supabase
             .from('restaurant_settings')
-            .insert({ key: update.key, value: update.value });
+            .insert({ key: update.key, value: update.value as import('@/integrations/supabase/types').Json });
           if (error) throw error;
         }
       }
