@@ -82,6 +82,13 @@ export function Footer() {
             >
               Datenschutz
             </Link>
+            <span className="hidden md:inline text-primary-foreground/30">|</span>
+            <Link 
+              to="/admin/login" 
+              className="text-primary-foreground/40 hover:text-gold transition-colors text-xs"
+            >
+              Admin
+            </Link>
           </div>
         </div>
 
