@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +40,59 @@ interface MenuItem {
   sort_order: number;
 }
 
+const allergenCodes = Object.keys(allergenInfo);
+const allergenCodeList = allergenCodes.map(code => code.toUpperCase()).join(', ');
+
+const parseAllergens = (value: string) =>
+  value
+    .split(',')
+    .map(a => a.trim().toLowerCase())
+    .filter(Boolean);
+
+const getInvalidAllergens = (value: string) =>
+  parseAllergens(value).filter(code => !allergenCodes.includes(code));
+
+const categorySchema = z.object({
+  name: z.string().trim().min(1, 'Name erforderlich'),
+  description: z.string().trim().max(500, 'Maximal 500 Zeichen').optional().or(z.literal('')),
+});
+
+  type CategoryFormValues = z.input<typeof categorySchema>;
+
+const itemPriceSchema = z.preprocess(
+  (value) => {
+    if (typeof value === 'string') {
+      return value.replace(',', '.');
+    }
+    return value;
+  },
+  z.coerce.number().min(0.01, 'Preis muss größer als 0 sein'),
+);
+
+const itemSchema = z
+  .object({
+    categoryId: z.string().min(1, 'Kategorie erforderlich'),
+    name: z.string().trim().min(1, 'Name erforderlich'),
+    description: z.string().trim().max(1000, 'Maximal 1000 Zeichen').optional().or(z.literal('')),
+    price: itemPriceSchema,
+    allergens: z.string().optional().or(z.literal('')),
+    isVegetarian: z.boolean(),
+    isAvailable: z.boolean(),
+    isPopular: z.boolean(),
+  })
+  .superRefine((values, ctx) => {
+    const invalid = getInvalidAllergens(values.allergens ?? '');
+    if (invalid.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['allergens'],
+        message: `Unbekannte Codes: ${invalid.map(code => code.toUpperCase()).join(', ')}`,
+      });
+    }
+  });
+
+  type ItemFormValues = z.input<typeof itemSchema>;
+
 export default function AdminMenu() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -64,17 +120,27 @@ export default function AdminMenu() {
   const [saving, setSaving] = useState(false);
   const [reorderingId, setReorderingId] = useState<string | null>(null);
 
-  const allergenCodes = Object.keys(allergenInfo);
-  const allergenCodeList = allergenCodes.map(code => code.toUpperCase()).join(', ');
+  const categoryForm = useForm<CategoryFormValues>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
 
-  const parseAllergens = (value: string) =>
-    value
-      .split(',')
-      .map(a => a.trim().toLowerCase())
-      .filter(Boolean);
-
-  const getInvalidAllergens = (value: string) =>
-    parseAllergens(value).filter(code => !allergenCodes.includes(code));
+  const itemForm = useForm<ItemFormValues>({
+    resolver: zodResolver(itemSchema),
+    defaultValues: {
+      categoryId: '',
+      name: '',
+      description: '',
+      price: 0,
+      allergens: '',
+      isVegetarian: false,
+      isAvailable: true,
+      isPopular: false,
+    },
+  });
 
   useEffect(() => {
     fetchData();
@@ -111,36 +177,48 @@ export default function AdminMenu() {
       setEditingCategory(category);
       setCategoryName(category.name);
       setCategoryDescription(category.description || '');
+      categoryForm.reset({
+        name: category.name,
+        description: category.description || '',
+      });
     } else {
       setEditingCategory(null);
       setCategoryName('');
       setCategoryDescription('');
+      categoryForm.reset({ name: '', description: '' });
     }
+    categoryForm.clearErrors();
     setCategoryDialogOpen(true);
   };
 
   const saveCategory = async () => {
-    if (!categoryName.trim()) {
-      toast({ title: 'Name erforderlich', variant: 'destructive' });
+    const valid = await categoryForm.trigger();
+    if (!valid) {
+      const message = categoryForm.formState.errors.name?.message
+        ?? categoryForm.formState.errors.description?.message
+        ?? 'Bitte prüfen Sie Ihre Eingaben.';
+      toast({ title: 'Ungültige Eingaben', description: message, variant: 'destructive' });
       return;
     }
+
+    const values = categoryForm.getValues();
 
     setSaving(true);
     try {
       if (editingCategory) {
         const { error } = await supabase
           .from('menu_categories')
-          .update({ name: categoryName, description: categoryDescription || null })
+          .update({ name: values.name, description: values.description || null })
           .eq('id', editingCategory.id);
         if (error) throw error;
         toast({ title: 'Kategorie aktualisiert' });
       } else {
         const { error } = await supabase
           .from('menu_categories')
-          .insert({ 
-            name: categoryName, 
-            description: categoryDescription || null,
-            sort_order: categories.length 
+          .insert({
+            name: values.name,
+            description: values.description || null,
+            sort_order: categories.length,
           });
         if (error) throw error;
         toast({ title: 'Kategorie erstellt' });
@@ -181,7 +259,18 @@ export default function AdminMenu() {
       setItemAvailable(item.is_available);
       setItemPopular(item.is_popular || false);
       setItemCategoryId(item.category_id);
+      itemForm.reset({
+        categoryId: item.category_id,
+        name: item.name,
+        description: item.description || '',
+        price: item.price,
+        allergens: item.allergens?.join(', ') || '',
+        isVegetarian: item.is_vegetarian,
+        isAvailable: item.is_available,
+        isPopular: item.is_popular || false,
+      });
     } else {
+      const fallbackCategory = selectedCategory || categories[0]?.id || '';
       setEditingItem(null);
       setItemName('');
       setItemDescription('');
@@ -190,45 +279,48 @@ export default function AdminMenu() {
       setItemVegetarian(false);
       setItemAvailable(true);
       setItemPopular(false);
-      setItemCategoryId(selectedCategory || categories[0]?.id || '');
+      setItemCategoryId(fallbackCategory);
+      itemForm.reset({
+        categoryId: fallbackCategory,
+        name: '',
+        description: '',
+        price: 0,
+        allergens: '',
+        isVegetarian: false,
+        isAvailable: true,
+        isPopular: false,
+      });
     }
+    itemForm.clearErrors();
     setItemDialogOpen(true);
   };
 
   const saveItem = async () => {
-    if (!itemName.trim() || !itemPrice || !itemCategoryId) {
-      toast({ title: 'Name, Preis und Kategorie erforderlich', variant: 'destructive' });
+    const valid = await itemForm.trigger();
+    if (!valid) {
+      const message = itemForm.formState.errors.name?.message
+        ?? itemForm.formState.errors.price?.message
+        ?? itemForm.formState.errors.categoryId?.message
+        ?? itemForm.formState.errors.allergens?.message
+        ?? 'Bitte prüfen Sie Ihre Eingaben.';
+      toast({ title: 'Ungültige Eingaben', description: message, variant: 'destructive' });
       return;
     }
 
-    const priceNum = parseFloat(itemPrice.replace(',', '.'));
-    if (isNaN(priceNum) || priceNum < 0) {
-      toast({ title: 'Ungültiger Preis', variant: 'destructive' });
-      return;
-    }
-
-    const allergensArray = parseAllergens(itemAllergens);
-    const invalidAllergens = allergensArray.filter(code => !allergenCodes.includes(code));
-    if (invalidAllergens.length > 0) {
-      toast({
-        title: 'Ungültige Allergen-Codes',
-        description: `Bitte prüfen: ${invalidAllergens.map(code => code.toUpperCase()).join(', ')}`,
-        variant: 'destructive',
-      });
-      return;
-    }
+    const parsed = itemSchema.parse(itemForm.getValues());
+    const allergensArray = parseAllergens(parsed.allergens ?? '');
 
     setSaving(true);
     try {
       const itemData = {
-        category_id: itemCategoryId,
-        name: itemName,
-        description: itemDescription || null,
-        price: priceNum,
+        category_id: parsed.categoryId,
+        name: parsed.name,
+        description: parsed.description || null,
+        price: parsed.price,
         allergens: allergensArray,
-        is_vegetarian: itemVegetarian,
-        is_available: itemAvailable,
-        is_popular: itemPopular,
+        is_vegetarian: parsed.isVegetarian,
+        is_available: parsed.isAvailable,
+        is_popular: parsed.isPopular,
       };
 
       if (editingItem) {
@@ -241,9 +333,9 @@ export default function AdminMenu() {
       } else {
         const { error } = await supabase
           .from('menu_items')
-          .insert({ 
-            ...itemData, 
-            sort_order: menuItems.filter(i => i.category_id === itemCategoryId).length 
+          .insert({
+            ...itemData,
+            sort_order: menuItems.filter(i => i.category_id === parsed.categoryId).length,
           });
         if (error) throw error;
         toast({ title: 'Gericht erstellt' });
@@ -332,6 +424,8 @@ export default function AdminMenu() {
     : menuItems;
 
   const invalidAllergens = getInvalidAllergens(itemAllergens);
+  const categoryErrors = categoryForm.formState.errors;
+  const itemErrors = itemForm.formState.errors;
 
   if (loading) {
     return (
@@ -518,18 +612,32 @@ export default function AdminMenu() {
               <Input
                 id="cat-name"
                 value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCategoryName(value);
+                  categoryForm.setValue('name', value, { shouldValidate: true });
+                }}
                 placeholder="z.B. Vorspeisen"
               />
+              {categoryErrors.name && (
+                <p className="text-xs text-destructive">{categoryErrors.name.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="cat-desc">Beschreibung (optional)</Label>
               <Textarea
                 id="cat-desc"
                 value={categoryDescription}
-                onChange={(e) => setCategoryDescription(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCategoryDescription(value);
+                  categoryForm.setValue('description', value, { shouldValidate: true });
+                }}
                 placeholder="Kurze Beschreibung..."
               />
+              {categoryErrors.description && (
+                <p className="text-xs text-destructive">{categoryErrors.description.message}</p>
+              )}
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setCategoryDialogOpen(false)}>
@@ -558,7 +666,13 @@ export default function AdminMenu() {
           <div className="space-y-4 max-h-[70vh] overflow-y-auto">
             <div className="space-y-2">
               <Label htmlFor="item-cat">Kategorie</Label>
-              <Select value={itemCategoryId} onValueChange={setItemCategoryId}>
+              <Select
+                value={itemCategoryId}
+                onValueChange={(value) => {
+                  setItemCategoryId(value);
+                  itemForm.setValue('categoryId', value, { shouldValidate: true });
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Kategorie wählen" />
                 </SelectTrigger>
@@ -568,24 +682,41 @@ export default function AdminMenu() {
                   ))}
                 </SelectContent>
               </Select>
+              {itemErrors.categoryId && (
+                <p className="text-xs text-destructive">{itemErrors.categoryId.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="item-name">Name</Label>
               <Input
                 id="item-name"
                 value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setItemName(value);
+                  itemForm.setValue('name', value, { shouldValidate: true });
+                }}
                 placeholder="z.B. Gyros Teller"
               />
+              {itemErrors.name && (
+                <p className="text-xs text-destructive">{itemErrors.name.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="item-desc">Beschreibung (optional)</Label>
               <Textarea
                 id="item-desc"
                 value={itemDescription}
-                onChange={(e) => setItemDescription(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setItemDescription(value);
+                  itemForm.setValue('description', value, { shouldValidate: true });
+                }}
                 placeholder="Beschreibung des Gerichts..."
               />
+              {itemErrors.description && (
+                <p className="text-xs text-destructive">{itemErrors.description.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="item-price">Preis (€)</Label>
@@ -593,18 +724,32 @@ export default function AdminMenu() {
                 id="item-price"
                 type="text"
                 value={itemPrice}
-                onChange={(e) => setItemPrice(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setItemPrice(value);
+                  itemForm.setValue('price', value, { shouldValidate: true });
+                }}
                 placeholder="z.B. 12,90"
               />
+              {itemErrors.price && (
+                <p className="text-xs text-destructive">{itemErrors.price.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="item-allergens">Allergene (kommagetrennt)</Label>
               <Input
                 id="item-allergens"
                 value={itemAllergens}
-                onChange={(e) => setItemAllergens(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setItemAllergens(value);
+                  itemForm.setValue('allergens', value, { shouldValidate: true });
+                }}
                 placeholder="z.B. A, G, L"
               />
+              {itemErrors.allergens && (
+                <p className="text-xs text-destructive">{itemErrors.allergens.message}</p>
+              )}
               {invalidAllergens.length > 0 && (
                 <p className="text-xs text-destructive">
                   Unbekannte Codes: {invalidAllergens.map(code => code.toUpperCase()).join(', ')}
@@ -619,7 +764,10 @@ export default function AdminMenu() {
               <Switch 
                 id="item-veg"
                 checked={itemVegetarian} 
-                onCheckedChange={setItemVegetarian} 
+                onCheckedChange={(checked) => {
+                  setItemVegetarian(checked);
+                  itemForm.setValue('isVegetarian', checked, { shouldValidate: true });
+                }}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -627,7 +775,10 @@ export default function AdminMenu() {
               <Switch 
                 id="item-popular"
                 checked={itemPopular} 
-                onCheckedChange={setItemPopular} 
+                onCheckedChange={(checked) => {
+                  setItemPopular(checked);
+                  itemForm.setValue('isPopular', checked, { shouldValidate: true });
+                }}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -635,7 +786,10 @@ export default function AdminMenu() {
               <Switch 
                 id="item-avail"
                 checked={itemAvailable} 
-                onCheckedChange={setItemAvailable} 
+                onCheckedChange={(checked) => {
+                  setItemAvailable(checked);
+                  itemForm.setValue('isAvailable', checked, { shouldValidate: true });
+                }}
               />
             </div>
             <div className="flex justify-end gap-2 pt-4">

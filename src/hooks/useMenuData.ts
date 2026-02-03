@@ -73,9 +73,13 @@ export function useMenuData() {
       setCategories(categoriesRes.data || []);
       setMenuItems(itemsRes.data || []);
       setWeeklyOffers(offersRes.data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching menu data:', err);
-      setError(err.message);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Unbekannter Fehler');
+      }
     } finally {
       setLoading(false);
     }

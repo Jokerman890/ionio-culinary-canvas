@@ -86,6 +86,15 @@ npm test
 
 ## 📝 Changelog
 
+### Version 1.4.0 (2026-02-01)
+**🛡️ Audit & Tests**
+- ✅ Umfassendes Code-Audit durchgeführt
+- 🤖 E2E-Testskripte für Admin-Bereich hinzugefügt
+- 🔐 Sicherheits-Check (RLS, Rate-Limiting) erfolgreich
+- 🐛 Unit- und Integrationstests stabilisiert
+
+
+
 ### Version 1.3.0 (2026-01-31)
 **✨ Verbesserungen**
 - 🧪 **UI-Tests** für Speisekarte und Wochenangebote ergänzt

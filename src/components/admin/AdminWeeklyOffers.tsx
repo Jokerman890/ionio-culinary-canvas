@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,10 +26,58 @@ interface WeeklyOffer {
   valid_until: string | null;
 }
 
+const priceSchema = z.preprocess(
+  (value) => (typeof value === 'string' ? value.replace(',', '.') : value),
+  z.coerce.number().min(0, 'Preis muss 0 oder größer sein'),
+);
+
+const optionalPriceSchema = z.preprocess(
+  (value) => {
+    if (value === '' || value === null || value === undefined) return undefined;
+    return typeof value === 'string' ? value.replace(',', '.') : value;
+  },
+  z.coerce.number().min(0, 'Preis muss 0 oder größer sein').optional(),
+);
+
+const weeklyOfferSchema = z.object({
+  id: z.string(),
+  position: z.number(),
+  name: z.string().trim().min(1, 'Name erforderlich'),
+  description: z.string().trim().max(500, 'Maximal 500 Zeichen').optional().or(z.literal('')),
+  price: priceSchema,
+  original_price: optionalPriceSchema,
+  is_active: z.boolean(),
+});
+
+const weeklyOffersFormSchema = z.object({
+  offers: z.array(weeklyOfferSchema).length(3),
+});
+
+type WeeklyOffersFormValues = z.input<typeof weeklyOffersFormSchema>;
+
 export function AdminWeeklyOffers() {
-  const [offers, setOffers] = useState<WeeklyOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<number | null>(null);
+  const {
+    control,
+    register,
+    reset,
+    getValues,
+    trigger,
+    watch,
+    formState: { errors },
+  } = useForm<WeeklyOffersFormValues>({
+    resolver: zodResolver(weeklyOffersFormSchema),
+    defaultValues: { offers: [] },
+  });
+
+  const { fields } = useFieldArray({
+    control,
+    name: 'offers',
+    keyName: 'fieldId',
+  });
+
+  const watchedOffers = watch('offers');
 
   useEffect(() => {
     fetchOffers();
@@ -42,7 +93,10 @@ export function AdminWeeklyOffers() {
 
       if (error) throw error;
 
-      let data = initialData || [];
+      let data = (initialData || []).map((offer) => ({
+        ...offer,
+        is_active: offer.is_active ?? false,
+      }));
 
       const existingPositions = new Set(data.map(offer => offer.position));
       const missingPositions = [1, 2, 3].filter(position => !existingPositions.has(position));
@@ -65,16 +119,30 @@ export function AdminWeeklyOffers() {
         if (insertError) {
           toast({ title: 'Fehler beim Anlegen der Wochenangebote', variant: 'destructive' });
         } else if (inserted) {
-          data = [...data, ...inserted];
+          data = [...data, ...inserted].map((offer) => ({
+            ...offer,
+            is_active: offer.is_active ?? false,
+          }));
         }
       }
 
       const offersMap = new Map(data.map(offer => [offer.position, offer]));
-      const completeOffers = [1, 2, 3]
-        .map(position => offersMap.get(position))
-        .filter((offer): offer is WeeklyOffer => Boolean(offer));
+      const completeOffers = [1, 2, 3].flatMap((position) => {
+        const offer = offersMap.get(position);
+        return offer ? [offer] : [];
+      });
 
-      setOffers(completeOffers);
+      reset({
+        offers: completeOffers.map((offer) => ({
+          id: offer.id,
+          position: offer.position,
+          name: offer.name,
+          description: offer.description ?? '',
+          price: offer.price,
+          original_price: offer.original_price ?? '',
+          is_active: offer.is_active,
+        })),
+      });
     } catch (error) {
       console.error('Error fetching weekly offers:', error);
       toast({ title: 'Fehler beim Laden', variant: 'destructive' });
@@ -83,22 +151,25 @@ export function AdminWeeklyOffers() {
     }
   }
 
-  const updateOffer = (position: number, field: keyof WeeklyOffer, value: any) => {
-    setOffers(prev => prev.map(o => 
-      o.position === position ? { ...o, [field]: value } : o
-    ));
-  };
+  const saveOffer = async (index: number) => {
+    const isValid = await trigger(`offers.${index}` as const);
+    if (!isValid) {
+      toast({ title: 'Ungültige Eingaben', variant: 'destructive' });
+      return;
+    }
 
-  const saveOffer = async (offer: WeeklyOffer) => {
+    const parsed = weeklyOffersFormSchema.parse(getValues());
+    const offer = parsed.offers[index];
+
     setSaving(offer.position);
     try {
       const { error } = await supabase
         .from('weekly_offers')
         .update({
           name: offer.name,
-          description: offer.description,
+          description: offer.description || null,
           price: offer.price,
-          original_price: offer.original_price,
+          original_price: offer.original_price ?? null,
           is_active: offer.is_active,
         })
         .eq('id', offer.id);
@@ -116,14 +187,22 @@ export function AdminWeeklyOffers() {
   const saveAllOffers = async () => {
     setSaving(-1);
     try {
-      for (const offer of offers) {
+      const isValid = await trigger('offers');
+      if (!isValid) {
+        toast({ title: 'Ungültige Eingaben', variant: 'destructive' });
+        return;
+      }
+
+      const parsed = weeklyOffersFormSchema.parse(getValues());
+
+      for (const offer of parsed.offers) {
         const { error } = await supabase
           .from('weekly_offers')
           .update({
             name: offer.name,
-            description: offer.description,
+            description: offer.description || null,
             price: offer.price,
-            original_price: offer.original_price,
+            original_price: offer.original_price ?? null,
             is_active: offer.is_active,
           })
           .eq('id', offer.id);
@@ -176,15 +255,18 @@ export function AdminWeeklyOffers() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {offers.map((offer) => (
-          <Card 
-            key={offer.id} 
-            className={`border-2 transition-all duration-short ${
-              offer.is_active 
-                ? 'border-gold/50 bg-gold/5' 
-                : 'border-border/50 opacity-60'
-            }`}
-          >
+        {fields.map((offer, index) => {
+          const offerState = watchedOffers?.[index];
+          const isActive = offerState?.is_active ?? offer.is_active;
+          return (
+            <Card 
+              key={offer.fieldId} 
+              className={`border-2 transition-all duration-short ${
+                isActive 
+                  ? 'border-gold/50 bg-gold/5' 
+                  : 'border-border/50 opacity-60'
+              }`}
+            >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
@@ -194,33 +276,42 @@ export function AdminWeeklyOffers() {
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">Aktiv</span>
-                  <Switch
-                    checked={offer.is_active}
-                    onCheckedChange={(checked) => updateOffer(offer.position, 'is_active', checked)}
+                  <Controller
+                    control={control}
+                    name={`offers.${index}.is_active` as const}
+                    render={({ field }) => (
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    )}
                   />
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              <input type="hidden" {...register(`offers.${index}.id` as const)} />
+              <input type="hidden" {...register(`offers.${index}.position` as const, { valueAsNumber: true })} />
               <div className="space-y-2">
                 <Label htmlFor={`name-${offer.position}`}>Gerichtname</Label>
                 <Input
                   id={`name-${offer.position}`}
-                  value={offer.name}
-                  onChange={(e) => updateOffer(offer.position, 'name', e.target.value)}
+                  {...register(`offers.${index}.name` as const)}
                   placeholder="z.B. Gyros Spezial"
                 />
+                {errors.offers?.[index]?.name && (
+                  <p className="text-xs text-destructive">{errors.offers[index]?.name?.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor={`desc-${offer.position}`}>Beschreibung</Label>
                 <Textarea
                   id={`desc-${offer.position}`}
-                  value={offer.description || ''}
-                  onChange={(e) => updateOffer(offer.position, 'description', e.target.value)}
+                  {...register(`offers.${index}.description` as const)}
                   placeholder="Kurze Beschreibung..."
                   rows={2}
                 />
+                {errors.offers?.[index]?.description && (
+                  <p className="text-xs text-destructive">{errors.offers[index]?.description?.message}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -228,28 +319,32 @@ export function AdminWeeklyOffers() {
                   <Label htmlFor={`price-${offer.position}`}>Angebotspreis (€)</Label>
                   <Input
                     id={`price-${offer.position}`}
-                    type="number"
-                    step="0.10"
-                    value={offer.price}
-                    onChange={(e) => updateOffer(offer.position, 'price', parseFloat(e.target.value) || 0)}
+                    type="text"
+                    inputMode="decimal"
+                    {...register(`offers.${index}.price` as const)}
                   />
+                  {errors.offers?.[index]?.price && (
+                    <p className="text-xs text-destructive">{errors.offers[index]?.price?.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor={`orig-${offer.position}`}>Originalpreis (€)</Label>
                   <Input
                     id={`orig-${offer.position}`}
-                    type="number"
-                    step="0.10"
-                    value={offer.original_price || ''}
-                    onChange={(e) => updateOffer(offer.position, 'original_price', parseFloat(e.target.value) || null)}
+                    type="text"
+                    inputMode="decimal"
+                    {...register(`offers.${index}.original_price` as const)}
                     placeholder="Optional"
                   />
+                  {errors.offers?.[index]?.original_price && (
+                    <p className="text-xs text-destructive">{errors.offers[index]?.original_price?.message}</p>
+                  )}
                 </div>
               </div>
 
               <Button
                 className="w-full bg-navy text-primary-foreground hover:bg-navy-light btn-animate"
-                onClick={() => saveOffer(offer)}
+                onClick={() => saveOffer(index)}
                 disabled={saving !== null}
               >
                 {saving === offer.position ? (
@@ -263,7 +358,8 @@ export function AdminWeeklyOffers() {
               </Button>
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
 
       <p className="text-sm text-muted-foreground text-center">

@@ -1,1 +1,8 @@
+project_id = "uuohpodkgblvjrhvfldl"
+
+[functions.verify-admin]
+verify_jwt = false
+
+[functions.login-rate-limited]
+verify_jwt = false
 project_id = "mfhjnxzleewxzglkbjnz"
