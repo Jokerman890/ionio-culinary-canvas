@@ -1,16 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const allowedOrigins = ['https://ionio-ganderkesee.de', 'http://localhost:5173']
-const defaultOrigin = allowedOrigins[0]
-
-const resolveOrigin = (origin: string | null) =>
-  origin && allowedOrigins.includes(origin) ? origin : defaultOrigin
-
-const corsHeaders = (origin: string | null) => ({
-  'Access-Control-Allow-Origin': resolveOrigin(origin),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  Vary: 'Origin',
-})
+import { corsHeaders } from '../_shared/cors.ts'
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests

@@ -40,7 +40,7 @@ describe('AdminLogin Integration', () => {
         vi.clearAllMocks()
     })
 
-    it('renders login form', () => {
+    it('renders login form', async () => {
         render(
             <BrowserRouter>
                 <AuthProvider>
@@ -48,9 +48,9 @@ describe('AdminLogin Integration', () => {
                 </AuthProvider>
             </BrowserRouter>
         )
-        expect(screen.getByLabelText(/E-Mail/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Passwort/i)).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /Anmelden/i })).toBeInTheDocument()
+        expect(await screen.findByLabelText(/E-Mail/i)).toBeInTheDocument()
+        expect(await screen.findByLabelText(/Passwort/i)).toBeInTheDocument()
+        expect(await screen.findByRole('button', { name: /Anmelden/i })).toBeInTheDocument()
     })
 
     it('handles successful login via edge function', async () => {
@@ -64,9 +64,9 @@ describe('AdminLogin Integration', () => {
             </BrowserRouter>
         )
 
-        fireEvent.change(screen.getByLabelText(/E-Mail/i), { target: { value: 'admin@test.com' } })
-        fireEvent.change(screen.getByLabelText(/Passwort/i), { target: { value: 'password123' } })
-        fireEvent.click(screen.getByRole('button', { name: /Anmelden/i }))
+        fireEvent.change(await screen.findByLabelText(/E-Mail/i), { target: { value: 'admin@test.com' } })
+        fireEvent.change(await screen.findByLabelText(/Passwort/i), { target: { value: 'password123' } })
+        fireEvent.click(await screen.findByRole('button', { name: /Anmelden/i }))
 
         await waitFor(() => {
             expect(mockInvoke).toHaveBeenCalledWith('login-rate-limited', {
@@ -89,9 +89,9 @@ describe('AdminLogin Integration', () => {
             </BrowserRouter>
         )
 
-        fireEvent.change(screen.getByLabelText(/E-Mail/i), { target: { value: 'admin@test.com' } })
-        fireEvent.change(screen.getByLabelText(/Passwort/i), { target: { value: 'password123' } })
-        fireEvent.click(screen.getByRole('button', { name: /Anmelden/i }))
+        fireEvent.change(await screen.findByLabelText(/E-Mail/i), { target: { value: 'admin@test.com' } })
+        fireEvent.change(await screen.findByLabelText(/Passwort/i), { target: { value: 'password123' } })
+        fireEvent.click(await screen.findByRole('button', { name: /Anmelden/i }))
 
         // Expect toast or error message (toast is mocked, so we verify logic flow implicitly or mocked call)
         await waitFor(() => {
