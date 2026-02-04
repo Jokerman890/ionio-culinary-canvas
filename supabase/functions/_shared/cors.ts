@@ -1,10 +1,14 @@
 export const allowedOrigins = [
+  // Production domains
   'https://ionio-ganderkesee.de',
+  'https://ionio-culinary-canvas.vercel.app',
+
+  // Local dev
   'http://localhost:5173',
 ]
 
 export const resolveOrigin = (origin: string | null) =>
-  origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0]
+  origin && allowedOrigins.includes(origin) ? origin : 'https://ionio-ganderkesee.de'
 
 export const corsHeaders = (origin: string | null) => {
   const o = resolveOrigin(origin)
