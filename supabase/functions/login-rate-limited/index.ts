@@ -6,7 +6,7 @@ import { getClientIp, sha256Hex } from '../_shared/rateLimit.ts'
 // Environment requirements:
 // - SUPABASE_URL
 // - SUPABASE_ANON_KEY
-// - SUPABASE_SERVICE_ROLE_KEY (for rate-limit bookkeeping only)
+// - SERVICE_ROLE_KEY (for rate-limit bookkeeping only)
 
 const WINDOW_SEC = 5 * 60
 const LIMIT = 5
@@ -35,7 +35,8 @@ Deno.serve(async (req) => {
 
   // Rate-limit (server-side) BEFORE attempting auth.
   try {
-    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    // Supabase blocks secrets starting with SUPABASE_ in Edge Function env.
+    const serviceKey = Deno.env.get('SERVICE_ROLE_KEY')
     if (!serviceKey) {
       // Fail safe: if misconfigured, refuse rather than run without protection.
       return json({ error: 'Service unavailable' }, 503, origin)
