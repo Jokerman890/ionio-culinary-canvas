@@ -28,7 +28,24 @@ Deno.serve(async (req) => {
     return json({ error: 'Method not allowed' }, 405, origin)
   }
 
-  const { email, password } = await req.json().catch(() => ({ email: null, password: null }))
+  // Be tolerant about request shapes (curl, fetch, supabase-js invoke).
+  // We prefer reading text first to avoid JSON parsing edge-cases.
+  const rawBody = await req.text().catch(() => '')
+  const parsed = (() => {
+    try {
+      return rawBody ? JSON.parse(rawBody) : null
+    } catch {
+      return null
+    }
+  })()
+
+  const payload = (parsed && typeof parsed === 'object' && 'body' in (parsed as Record<string, unknown>))
+    ? (parsed as Record<string, unknown>).body
+    : parsed
+
+  const email = (payload as any)?.email
+  const password = (payload as any)?.password
+
   if (!email || !password) {
     return json({ error: 'Missing credentials' }, 400, origin)
   }
