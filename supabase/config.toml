@@ -1,7 +1,7 @@
 # Supabase project binding
 # NOTE: keep a single project_id here to avoid drift between local/stage/prod.
 # If you use staging, manage it via separate branches/config, not per-function project_id.
-project_id = "uuohpodkgblvjrhvfldl"
+project_id = "wpbabzkzksnfczljoefv"
 
 [functions.verify-admin]
 # verify-admin is security-sensitive → require a valid JWT.
