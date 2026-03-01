@@ -50,7 +50,7 @@ describe('AdminLogin Integration', () => {
         )
         expect(await screen.findByLabelText(/E-Mail/i)).toBeInTheDocument()
         expect(await screen.findByLabelText(/Passwort/i)).toBeInTheDocument()
-        expect(await screen.findByRole('button', { name: /Anmelden/i })).toBeInTheDocument()
+        expect(await screen.findByRole('button', { name: /^Anmelden$/i })).toBeInTheDocument()
     })
 
     it('handles successful login via edge function', async () => {
@@ -66,7 +66,7 @@ describe('AdminLogin Integration', () => {
 
         fireEvent.change(await screen.findByLabelText(/E-Mail/i), { target: { value: 'admin@test.com' } })
         fireEvent.change(await screen.findByLabelText(/Passwort/i), { target: { value: 'password123' } })
-        fireEvent.click(await screen.findByRole('button', { name: /Anmelden/i }))
+        fireEvent.click(await screen.findByRole('button', { name: /^Anmelden$/i }))
 
         await waitFor(() => {
             expect(mockInvoke).toHaveBeenCalledWith('login-rate-limited', {
@@ -91,7 +91,7 @@ describe('AdminLogin Integration', () => {
 
         fireEvent.change(await screen.findByLabelText(/E-Mail/i), { target: { value: 'admin@test.com' } })
         fireEvent.change(await screen.findByLabelText(/Passwort/i), { target: { value: 'password123' } })
-        fireEvent.click(await screen.findByRole('button', { name: /Anmelden/i }))
+        fireEvent.click(await screen.findByRole('button', { name: /^Anmelden$/i }))
 
         // Expect toast or error message (toast is mocked, so we verify logic flow implicitly or mocked call)
         await waitFor(() => {
