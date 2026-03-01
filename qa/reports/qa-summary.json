@@ -1,0 +1,71 @@
+{
+  "baseUrl": "http://127.0.0.1:8080",
+  "startedAt": "2026-03-01T08:05:47.372Z",
+  "results": [
+    {
+      "target": "desktop-chromium",
+      "browser": "chromium",
+      "passed": true,
+      "steps": [
+        "home-loaded",
+        "home-content-ok",
+        "login-rendered",
+        "login-attempted",
+        "admin-menu-checked"
+      ],
+      "errors": []
+    },
+    {
+      "target": "desktop-firefox",
+      "browser": "firefox",
+      "passed": false,
+      "steps": [],
+      "errors": [
+        "browserType.launch: Executable doesn't exist at /home/Joker/.cache/ms-playwright/firefox-1509/firefox/firefox\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+      ]
+    },
+    {
+      "target": "desktop-webkit",
+      "browser": "webkit",
+      "passed": false,
+      "steps": [],
+      "errors": [
+        "browserType.launch: Executable doesn't exist at /home/Joker/.cache/ms-playwright/webkit-2248/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+      ]
+    },
+    {
+      "target": "mobile-iphone12",
+      "browser": "webkit",
+      "passed": false,
+      "steps": [],
+      "errors": [
+        "browserType.launch: Executable doesn't exist at /home/Joker/.cache/ms-playwright/webkit-2248/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+      ]
+    },
+    {
+      "target": "mobile-pixel7",
+      "browser": "chromium",
+      "passed": true,
+      "steps": [
+        "home-loaded",
+        "home-content-ok",
+        "login-rendered",
+        "login-attempted",
+        "admin-menu-checked"
+      ],
+      "errors": []
+    },
+    {
+      "target": "tablet-ipad",
+      "browser": "webkit",
+      "passed": false,
+      "steps": [],
+      "errors": [
+        "browserType.launch: Executable doesn't exist at /home/Joker/.cache/ms-playwright/webkit-2248/pw_run.sh\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝"
+      ]
+    }
+  ],
+  "finishedAt": "2026-03-01T08:06:01.934Z",
+  "passed": 2,
+  "failed": 4
+}
