@@ -80,6 +80,7 @@ export type Database = {
           category_id: string
           created_at: string
           description: string | null
+          dish_number: string | null
           id: string
           is_available: boolean | null
           is_popular: boolean | null
@@ -94,6 +95,7 @@ export type Database = {
           category_id: string
           created_at?: string
           description?: string | null
+          dish_number?: string | null
           id?: string
           is_available?: boolean | null
           is_popular?: boolean | null
@@ -108,6 +110,7 @@ export type Database = {
           category_id?: string
           created_at?: string
           description?: string | null
+          dish_number?: string | null
           id?: string
           is_available?: boolean | null
           is_popular?: boolean | null

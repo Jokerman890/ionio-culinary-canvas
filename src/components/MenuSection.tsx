@@ -140,7 +140,7 @@ function DatabaseMenuItemCard({ item, index }: { item: MenuItem; index: number }
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
           <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-gold transition-colors duration-short">
-            {item.name}
+            {item.dish_number ? `${item.dish_number}. ${item.name}` : item.name}
           </h3>
           {item.is_vegetarian && (
             <Tooltip>
@@ -226,7 +226,7 @@ function FallbackMenuItemCard({ item, index }: { item: typeof fallbackCategories
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
           <h3 className="font-serif text-lg md:text-xl text-foreground group-hover:text-gold transition-colors duration-short">
-            {item.name}
+            {item.dishNumber ? `${item.dishNumber}. ${item.name}` : item.name}
           </h3>
           {item.vegetarian && (
             <Tooltip>
