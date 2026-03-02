@@ -11,6 +11,7 @@ export interface MenuCategory {
 export interface MenuItem {
   id: string;
   category_id: string;
+  dish_number: string | null;
   name: string;
   description: string | null;
   price: number;
