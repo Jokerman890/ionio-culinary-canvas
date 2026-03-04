@@ -12,21 +12,21 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image - using img for better LCP optimization */}
-      <img 
+      <img
         src={heroImage}
         alt=""
         fetchPriority="high"
         decoding="async"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+        className="absolute inset-0 w-full h-full object-cover" />
+      
       
       {/* Overlay */}
       <div className="absolute inset-0 hero-overlay" />
       
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center pt-16">
-        <h1 className="hero-animate font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 leading-tight">
-          Authentische griechische Küche
+        <h1 className="hero-animate font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 leading-tight">Restaurant IONIO   Authentische griechische Küche
+in Ganderkesee
           <span className="block text-gold mt-2">in Ganderkesee</span>
         </h1>
         
@@ -35,23 +35,23 @@ export function HeroSection() {
         </p>
         
         <div className="hero-animate hero-animate-delay-2 flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            variant="hero" 
+          <Button
+            variant="hero"
             size="xl"
             onClick={scrollToContact}
-            className="btn-animate btn-glow"
-          >
+            className="btn-animate btn-glow">
+            
             Kontakt & Anfahrt
           </Button>
-          <Button 
-            variant="heroOutline" 
+          <Button
+            variant="heroOutline"
             size="xl"
             onClick={() => {
               const el = document.querySelector('#speisekarte');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="btn-animate"
-          >
+            className="btn-animate">
+            
             Speisekarte
           </Button>
         </div>
@@ -63,6 +63,6 @@ export function HeroSection() {
           <div className="w-1 h-3 bg-primary-foreground/60 rounded-full animate-bounce" />
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 }
