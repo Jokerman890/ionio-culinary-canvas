@@ -44,7 +44,8 @@ export function MenuSection() {
           </h2>
           <p className="text-muted-foreground mt-8 max-w-2xl mx-auto">
             Entdecken Sie die Vielfalt der griechischen Küche – 
-            von traditionellen Mezedes bis zu köstlichen Hauptgerichten vom Holzkohlegrill.
+            von traditionellen Mezedes bis zu köstlichen Hauptgerichten vom Holzkohlegrill, 
+            ergänzt durch erlesene griechische Weine und Getränke.
           </p>
         </div>
 
