@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Leaf, Star, Info, Loader2 } from 'lucide-react';
+import { AlertTriangle, Leaf, Star, Info, Loader2, UtensilsCrossed, Wine } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -17,20 +17,37 @@ import { menuCategories as fallbackCategories, allergenInfo } from '@/data/menuD
 
 type MenuCategoryWithItems = MenuCategory & { items: MenuItem[] };
 
+const DRINK_CATEGORY_IDS = new Set([
+  'kaffee', 'aperitif', 'alkoholfrei', 'bier', 'spirituosen', 'cocktails',
+  'rotweine', 'weissweine', 'roseweine',
+]);
+
+type MenuSection = 'speisen' | 'getraenke';
+
 export function MenuSection() {
   const { ref: titleRef, isRevealed: titleRevealed } = useScrollReveal<HTMLDivElement>();
   const { itemsByCategory, weeklyOffers, loading, error, refetch } = useMenuData();
   const [activeCategory, setActiveCategory] = useState<string>('');
+  const [activeSection, setActiveSection] = useState<MenuSection>('speisen');
 
-  // Use database data if available, otherwise fallback to static data
   const hasDbData = itemsByCategory.length > 0 && itemsByCategory.some(cat => cat.items.length > 0);
-  
-  // Set default category when data loads
-  const categories = hasDbData ? itemsByCategory : fallbackCategories;
+  const allCategories = hasDbData ? itemsByCategory : fallbackCategories;
+
+  const foodCategories = allCategories.filter(c => !DRINK_CATEGORY_IDS.has(c.id));
+  const drinkCategories = allCategories.filter(c => DRINK_CATEGORY_IDS.has(c.id));
+
+  const categories = activeSection === 'speisen' ? foodCategories : drinkCategories;
   const defaultCategory = categories[0]?.id || '';
-  
-  // Use activeCategory if set, otherwise use first category
-  const currentCategory = activeCategory || defaultCategory;
+
+  // Reset active category when switching sections if current doesn't belong
+  const currentCategory = categories.some(c => c.id === activeCategory)
+    ? activeCategory
+    : defaultCategory;
+
+  const handleSectionChange = (section: MenuSection) => {
+    setActiveSection(section);
+    setActiveCategory('');
+  };
 
   return (
     <section id="speisekarte" className="py-24 md:py-32 bg-background">
@@ -71,8 +88,37 @@ export function MenuSection() {
               </Alert>
             )}
 
-            {/* Weekly Offers */}
             <WeeklyOffersDisplay offers={weeklyOffers} />
+
+            {/* Section Toggle: Speisen / Getränke */}
+            <div className="flex justify-center gap-3 mb-8">
+              <Button
+                variant={activeSection === 'speisen' ? 'default' : 'outline'}
+                size="lg"
+                onClick={() => handleSectionChange('speisen')}
+                className={`rounded-full px-6 gap-2 transition-all duration-short ${
+                  activeSection === 'speisen'
+                    ? 'bg-gold text-navy hover:bg-gold/90'
+                    : 'border-gold/30 text-foreground hover:border-gold/60'
+                }`}
+              >
+                <UtensilsCrossed className="w-4 h-4" />
+                Speisen
+              </Button>
+              <Button
+                variant={activeSection === 'getraenke' ? 'default' : 'outline'}
+                size="lg"
+                onClick={() => handleSectionChange('getraenke')}
+                className={`rounded-full px-6 gap-2 transition-all duration-short ${
+                  activeSection === 'getraenke'
+                    ? 'bg-gold text-navy hover:bg-gold/90'
+                    : 'border-gold/30 text-foreground hover:border-gold/60'
+                }`}
+              >
+                <Wine className="w-4 h-4" />
+                Getränke
+              </Button>
+            </div>
 
             <TooltipProvider>
               <Tabs value={currentCategory} onValueChange={setActiveCategory} className="w-full">
@@ -106,7 +152,6 @@ export function MenuSection() {
           </>
         )}
 
-        {/* Allergen Legend */}
         <AllergenLegend />
       </div>
     </section>
