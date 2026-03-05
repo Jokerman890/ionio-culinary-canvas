@@ -17,10 +17,17 @@ import { menuCategories as fallbackCategories, allergenInfo } from '@/data/menuD
 
 type MenuCategoryWithItems = MenuCategory & { items: MenuItem[] };
 
+const DRINK_CATEGORY_NAMES = new Set([
+  'Kaffee', 'Aperitif', 'Alkoholfreie Getränke', 'Bier', 'Spirituosen', 'Cocktails',
+  'Rotweine', 'Weißweine', 'Roséweine',
+]);
 const DRINK_CATEGORY_IDS = new Set([
   'kaffee', 'aperitif', 'alkoholfrei', 'bier', 'spirituosen', 'cocktails',
   'rotweine', 'weissweine', 'roseweine',
 ]);
+function isDrinkCategory(cat: { id: string; name: string }) {
+  return DRINK_CATEGORY_NAMES.has(cat.name) || DRINK_CATEGORY_IDS.has(cat.id);
+}
 
 type MenuSection = 'speisen' | 'getraenke';
 
@@ -33,8 +40,8 @@ export function MenuSection() {
   const hasDbData = itemsByCategory.length > 0 && itemsByCategory.some(cat => cat.items.length > 0);
   const allCategories = hasDbData ? itemsByCategory : fallbackCategories;
 
-  const foodCategories = allCategories.filter(c => !DRINK_CATEGORY_IDS.has(c.id));
-  const drinkCategories = allCategories.filter(c => DRINK_CATEGORY_IDS.has(c.id));
+  const foodCategories = allCategories.filter(c => !isDrinkCategory(c));
+  const drinkCategories = allCategories.filter(c => isDrinkCategory(c));
 
   const categories = activeSection === 'speisen' ? foodCategories : drinkCategories;
   const defaultCategory = categories[0]?.id || '';
