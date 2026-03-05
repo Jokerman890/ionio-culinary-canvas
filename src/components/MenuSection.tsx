@@ -165,14 +165,34 @@ export function MenuSection() {
   );
 }
 
+// Category description note (red text from the PDF menu)
+// Highlights surcharge info like "Bauernsalat + 1,50€" in accent color
+function CategoryNote({ text }: { text: string }) {
+  // Split text at period to separate main note from surcharge
+  const surchargePattern = /(Bauernsalat\s*\+\s*\d+[,.]\d+\s*€(?:\s*Aufpreis)?)/i;
+  const parts = text.split(surchargePattern);
+
+  return (
+    <p className="text-center text-sm md:text-base text-muted-foreground mb-8 italic">
+      {parts.map((part, i) =>
+        surchargePattern.test(part) ? (
+          <span key={i} className="text-gold font-medium not-italic">
+            {part}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </p>
+  );
+}
+
 // Component for database-driven menu items
 function DatabaseMenuCategory({ category }: { category: MenuCategoryWithItems }) {
   return (
     <div className="animate-fade-in">
       {category.description && (
-        <p className="text-center text-muted-foreground mb-8 italic">
-          {category.description}
-        </p>
+        <CategoryNote text={category.description} />
       )}
       
       <div className="grid gap-4 md:gap-6 max-w-4xl mx-auto">
@@ -256,9 +276,7 @@ function FallbackMenuCategory({ category }: { category: typeof fallbackCategorie
   return (
     <div className="animate-fade-in">
       {category.description && (
-        <p className="text-center text-muted-foreground mb-8 italic">
-          {category.description}
-        </p>
+        <CategoryNote text={category.description} />
       )}
       
       <div className="grid gap-4 md:gap-6 max-w-4xl mx-auto">
