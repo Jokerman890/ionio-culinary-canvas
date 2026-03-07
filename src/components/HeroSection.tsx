@@ -19,14 +19,13 @@ export function HeroSection() {
         decoding="async"
         className="absolute inset-0 w-full h-full object-cover" />
       
-      
       {/* Overlay */}
       <div className="absolute inset-0 hero-overlay" />
       
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center pt-16">
-        <h1 className="hero-animate font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 leading-tight">Restaurant IONIO   Authentische griechische Küche
-in Ganderkesee
+        <h1 className="hero-animate font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 leading-tight">
+          Authentische griechische Küche
           <span className="block text-gold mt-2">in Ganderkesee</span>
         </h1>
         
@@ -40,7 +39,6 @@ in Ganderkesee
             size="xl"
             onClick={scrollToContact}
             className="btn-animate btn-glow">
-            
             Kontakt & Anfahrt
           </Button>
           <Button
@@ -51,7 +49,6 @@ in Ganderkesee
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
             className="btn-animate">
-            
             Speisekarte
           </Button>
         </div>
@@ -63,6 +60,6 @@ in Ganderkesee
           <div className="w-1 h-3 bg-primary-foreground/60 rounded-full animate-bounce" />
         </div>
       </div>
-    </section>);
-
+    </section>
+  );
 }
