@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useMenuData, type MenuCategory, type MenuItem } from '@/hooks/useMenuData';
+import { MenuSearch } from '@/components/menu/MenuSearch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
