@@ -4,6 +4,22 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.5.0] - 2026-03-07
+
+### ✨ Neue Features
+- 🔍 **Speisekarten-Suche**: Gäste können jetzt nach Gerichten suchen (Name und Beschreibung, ab 2 Zeichen)
+- 🏷️ **Kategorie-Hinweise**: Aufpreis-Hinweise (z.B. „Bauernsalat + 1,50€") werden goldfarben hervorgehoben
+- 🥬 **Vegetarisch-Markierungen**: Gerichte 142 und 146 korrekt als vegetarisch markiert
+- 📋 **Gerichtnummern ergänzt**: Fehlende Nummern (110–114) in der Kategorie „Vegetarisch" nachgetragen
+
+### 🐛 Bugfixes
+- 🏠 **Hero-Bereich**: Doppelten „in Ganderkesee"-Text entfernt – wird jetzt nur einmal in Gold angezeigt
+
+### 🔧 Technisch
+- Neue Komponente `MenuSearch` für die Suchfunktion
+- `MenuSection` um Such-Logik mit `useMemo` erweitert
+- Datenbank-Migration für vegetarische Flags und Gerichtnummern
+
 ## [1.4.0] - 2026-02-01
 
 ### 🛡️ Audit & Qualitätssicherung
