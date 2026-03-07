@@ -120,59 +120,89 @@ export function MenuSection() {
 
             <WeeklyOffersDisplay offers={weeklyOffers} />
 
-            {/* Section Toggle: Speisen / Getränke */}
-            <div className="flex justify-center gap-3 mb-8">
-              <Button
-                variant={activeSection === 'speisen' ? 'default' : 'outline'}
-                size="lg"
-                onClick={() => handleSectionChange('speisen')}
-                className={`rounded-full px-6 gap-2 transition-all duration-short ${
-                  activeSection === 'speisen'
-                    ? 'bg-gold text-navy hover:bg-gold/90'
-                    : 'border-gold/30 text-foreground hover:border-gold/60'
-                }`}
-              >
-                <UtensilsCrossed className="w-4 h-4" />
-                Speisen
-              </Button>
-              <Button
-                variant={activeSection === 'getraenke' ? 'default' : 'outline'}
-                size="lg"
-                onClick={() => handleSectionChange('getraenke')}
-                className={`rounded-full px-6 gap-2 transition-all duration-short ${
-                  activeSection === 'getraenke'
-                    ? 'bg-gold text-navy hover:bg-gold/90'
-                    : 'border-gold/30 text-foreground hover:border-gold/60'
-                }`}
-              >
-                <Wine className="w-4 h-4" />
-                Getränke
-              </Button>
-            </div>
+            {/* Search */}
+            <MenuSearch value={searchQuery} onChange={setSearchQuery} />
 
-            <TooltipProvider>
-              <Tabs value={currentCategory} onValueChange={setActiveCategory} className="w-full">
-                <TabsList className="flex flex-wrap justify-center gap-2 bg-transparent h-auto mb-8 p-0">
-                  {categories.map((category) => (
-                    <TabsTrigger
-                      key={category.id}
-                      value={category.id}
-                      className="data-[state=active]:bg-gold data-[state=active]:text-navy bg-secondary text-foreground px-4 py-2 rounded-full transition-all duration-short btn-animate"
-                    >
-                      {category.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+            {isSearching ? (
+              /* Search Results */
+              <div className="max-w-4xl mx-auto">
+                <p className="text-sm text-muted-foreground mb-4 text-center">
+                  {searchResults.length} {searchResults.length === 1 ? 'Ergebnis' : 'Ergebnisse'} für „{searchQuery.trim()}"
+                </p>
+                {searchResults.length > 0 ? (
+                  <div className="grid gap-4 md:gap-6">
+                    {searchResults.map(({ item, categoryName }, index) => (
+                      <div key={item.id || index}>
+                        {hasDbData ? (
+                          <DatabaseMenuItemCard item={item} index={index} />
+                        ) : (
+                          <FallbackMenuItemCard item={item} index={index} />
+                        )}
+                        <p className="text-xs text-muted-foreground/60 mt-1 ml-4">{categoryName}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Keine Gerichte gefunden. Versuchen Sie einen anderen Suchbegriff.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Section Toggle: Speisen / Getränke */}
+                <div className="flex justify-center gap-3 mb-8">
+                  <Button
+                    variant={activeSection === 'speisen' ? 'default' : 'outline'}
+                    size="lg"
+                    onClick={() => handleSectionChange('speisen')}
+                    className={`rounded-full px-6 gap-2 transition-all duration-short ${
+                      activeSection === 'speisen'
+                        ? 'bg-gold text-navy hover:bg-gold/90'
+                        : 'border-gold/30 text-foreground hover:border-gold/60'
+                    }`}
+                  >
+                    <UtensilsCrossed className="w-4 h-4" />
+                    Speisen
+                  </Button>
+                  <Button
+                    variant={activeSection === 'getraenke' ? 'default' : 'outline'}
+                    size="lg"
+                    onClick={() => handleSectionChange('getraenke')}
+                    className={`rounded-full px-6 gap-2 transition-all duration-short ${
+                      activeSection === 'getraenke'
+                        ? 'bg-gold text-navy hover:bg-gold/90'
+                        : 'border-gold/30 text-foreground hover:border-gold/60'
+                    }`}
+                  >
+                    <Wine className="w-4 h-4" />
+                    Getränke
+                  </Button>
+                </div>
 
-                {categories.map((category) => (
-                  <TabsContent key={category.id} value={category.id} className="mt-0">
-                    {hasDbData ? (
-                      <DatabaseMenuCategory 
-                        category={category as typeof itemsByCategory[0]} 
-                      />
-                    ) : (
-                      <FallbackMenuCategory 
-                        category={category as typeof fallbackCategories[0]} 
+                <TooltipProvider>
+                  <Tabs value={currentCategory} onValueChange={setActiveCategory} className="w-full">
+                    <TabsList className="flex flex-wrap justify-center gap-2 bg-transparent h-auto mb-8 p-0">
+                      {categories.map((category) => (
+                        <TabsTrigger
+                          key={category.id}
+                          value={category.id}
+                          className="data-[state=active]:bg-gold data-[state=active]:text-navy bg-secondary text-foreground px-4 py-2 rounded-full transition-all duration-short btn-animate"
+                        >
+                          {category.name}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+
+                    {categories.map((category) => (
+                      <TabsContent key={category.id} value={category.id} className="mt-0">
+                        {hasDbData ? (
+                          <DatabaseMenuCategory 
+                            category={category as typeof itemsByCategory[0]} 
+                          />
+                        ) : (
+                          <FallbackMenuCategory 
+                            category={category as typeof fallbackCategories[0]} 
                       />
                     )}
                   </TabsContent>
