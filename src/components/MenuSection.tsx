@@ -37,6 +37,7 @@ export function MenuSection() {
   const { itemsByCategory, weeklyOffers, loading, error, refetch } = useMenuData();
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [activeSection, setActiveSection] = useState<MenuSection>('speisen');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const hasDbData = itemsByCategory.length > 0 && itemsByCategory.some(cat => cat.items.length > 0);
   const allCategories = hasDbData ? itemsByCategory : fallbackCategories;
@@ -55,7 +56,28 @@ export function MenuSection() {
   const handleSectionChange = (section: MenuSection) => {
     setActiveSection(section);
     setActiveCategory('');
+    setSearchQuery('');
   };
+
+  // Filter items across all categories when searching
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const isSearching = normalizedQuery.length >= 2;
+
+  const searchResults = useMemo(() => {
+    if (!isSearching) return [];
+    const allCats = [...foodCategories, ...drinkCategories];
+    const results: { item: any; categoryName: string }[] = [];
+    for (const cat of allCats) {
+      for (const item of (cat as any).items || []) {
+        const name = (item.name || '').toLowerCase();
+        const desc = (item.description || '').toLowerCase();
+        if (name.includes(normalizedQuery) || desc.includes(normalizedQuery)) {
+          results.push({ item, categoryName: cat.name });
+        }
+      }
+    }
+    return results;
+  }, [normalizedQuery, isSearching, foodCategories, drinkCategories]);
 
   return (
     <section id="speisekarte" className="py-24 md:py-32 bg-background">
