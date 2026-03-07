@@ -208,7 +208,9 @@ export function MenuSection() {
                   </TabsContent>
                 ))}
               </Tabs>
-            </TooltipProvider>
+                </TooltipProvider>
+              </>
+            )}
           </>
         )}
 
