@@ -32,6 +32,7 @@ interface MenuItem {
   category_id: string;
   name: string;
   description: string | null;
+  dish_number: string | null;
   price: number;
   allergens: string[];
   is_vegetarian: boolean;
@@ -73,6 +74,7 @@ const itemSchema = z
   .object({
     categoryId: z.string().min(1, 'Kategorie erforderlich'),
     name: z.string().trim().min(1, 'Name erforderlich'),
+    dishNumber: z.string().trim().max(20, 'Maximal 20 Zeichen').optional().or(z.literal('')),
     description: z.string().trim().max(1000, 'Maximal 1000 Zeichen').optional().or(z.literal('')),
     price: itemPriceSchema,
     allergens: z.string().optional().or(z.literal('')),
@@ -109,6 +111,7 @@ export default function AdminMenu() {
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [itemName, setItemName] = useState('');
+  const [itemDishNumber, setItemDishNumber] = useState('');
   const [itemDescription, setItemDescription] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [itemAllergens, setItemAllergens] = useState('');
@@ -133,6 +136,7 @@ export default function AdminMenu() {
     defaultValues: {
       categoryId: '',
       name: '',
+      dishNumber: '',
       description: '',
       price: 0,
       allergens: '',
@@ -252,6 +256,7 @@ export default function AdminMenu() {
     if (item) {
       setEditingItem(item);
       setItemName(item.name);
+      setItemDishNumber(item.dish_number || '');
       setItemDescription(item.description || '');
       setItemPrice(item.price.toString());
       setItemAllergens(item.allergens?.join(', ') || '');
@@ -262,6 +267,7 @@ export default function AdminMenu() {
       itemForm.reset({
         categoryId: item.category_id,
         name: item.name,
+        dishNumber: item.dish_number || '',
         description: item.description || '',
         price: item.price,
         allergens: item.allergens?.join(', ') || '',
@@ -273,6 +279,7 @@ export default function AdminMenu() {
       const fallbackCategory = selectedCategory || categories[0]?.id || '';
       setEditingItem(null);
       setItemName('');
+      setItemDishNumber('');
       setItemDescription('');
       setItemPrice('');
       setItemAllergens('');
@@ -283,6 +290,7 @@ export default function AdminMenu() {
       itemForm.reset({
         categoryId: fallbackCategory,
         name: '',
+        dishNumber: '',
         description: '',
         price: 0,
         allergens: '',
@@ -315,6 +323,7 @@ export default function AdminMenu() {
       const itemData = {
         category_id: parsed.categoryId,
         name: parsed.name,
+        dish_number: parsed.dishNumber || null,
         description: parsed.description || null,
         price: parsed.price,
         allergens: allergensArray,
@@ -544,6 +553,9 @@ export default function AdminMenu() {
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
+                            {item.dish_number && (
+                              <span className="text-sm text-muted-foreground font-mono">{item.dish_number}</span>
+                            )}
                             <h3 className="font-medium">{item.name}</h3>
                             {item.is_vegetarian && (
                               <Badge variant="secondary" className="text-xs">Vegetarisch</Badge>
@@ -686,21 +698,36 @@ export default function AdminMenu() {
                 <p className="text-xs text-destructive">{itemErrors.categoryId.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="item-name">Name</Label>
-              <Input
-                id="item-name"
-                value={itemName}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setItemName(value);
-                  itemForm.setValue('name', value, { shouldValidate: true });
-                }}
-                placeholder="z.B. Gyros Teller"
-              />
-              {itemErrors.name && (
-                <p className="text-xs text-destructive">{itemErrors.name.message}</p>
-              )}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="item-name">Name</Label>
+                <Input
+                  id="item-name"
+                  value={itemName}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setItemName(value);
+                    itemForm.setValue('name', value, { shouldValidate: true });
+                  }}
+                  placeholder="z.B. Gyros Teller"
+                />
+                {itemErrors.name && (
+                  <p className="text-xs text-destructive">{itemErrors.name.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="item-dish-number">Nr.</Label>
+                <Input
+                  id="item-dish-number"
+                  value={itemDishNumber}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setItemDishNumber(value);
+                    itemForm.setValue('dishNumber', value, { shouldValidate: true });
+                  }}
+                  placeholder="z.B. 42"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="item-desc">Beschreibung (optional)</Label>

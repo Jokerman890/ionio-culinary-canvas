@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useServerAuth } from '@/hooks/useServerAuth';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Trash2, Loader2, Shield, User, ShieldAlert } from 'lucide-react';
+import { Plus, Trash2, Loader2, Shield, User, ShieldAlert, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getUserFriendlyError } from '@/lib/errorMessages';
 
@@ -35,6 +35,12 @@ export default function AdminUsers() {
   const [newRole, setNewRole] = useState<'admin' | 'staff'>('staff');
   const [saving, setSaving] = useState(false);
 
+  // Edit role dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserRole | null>(null);
+  const [editRole, setEditRole] = useState<'admin' | 'staff'>('staff');
+  const [editSaving, setEditSaving] = useState(false);
+
   useEffect(() => {
     if (isVerified && serverVerifiedAdmin) {
       fetchUsers();
@@ -44,16 +50,25 @@ export default function AdminUsers() {
   async function fetchUsers() {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        method: 'GET',
+      });
 
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
-      toast({ title: 'Fehler beim Laden', variant: 'destructive' });
+      // Fallback to direct query without emails
+      try {
+        const { data, error: fallbackError } = await supabase
+          .from('user_roles')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (fallbackError) throw fallbackError;
+        setUsers(data || []);
+      } catch {
+        toast({ title: 'Fehler beim Laden', variant: 'destructive' });
+      }
     } finally {
       setLoading(false);
     }
@@ -72,7 +87,6 @@ export default function AdminUsers() {
 
     setSaving(true);
     try {
-      // Create user via Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newEmail,
         password: newPassword,
@@ -84,7 +98,6 @@ export default function AdminUsers() {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Benutzer konnte nicht erstellt werden');
 
-      // Assign role
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
@@ -131,6 +144,36 @@ export default function AdminUsers() {
     }
   };
 
+  const openEditDialog = (userRole: UserRole) => {
+    setEditingUser(userRole);
+    setEditRole(userRole.role);
+    setEditDialogOpen(true);
+  };
+
+  const updateRole = async () => {
+    if (!editingUser) return;
+
+    setEditSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        method: 'PATCH',
+        body: { roleId: editingUser.id, newRole: editRole },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({ title: 'Rolle aktualisiert' });
+      setEditDialogOpen(false);
+      fetchUsers();
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminUsers.updateRole');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   // Show loading while verifying server-side
   if (verifying || !isVerified) {
     return (
@@ -143,7 +186,6 @@ export default function AdminUsers() {
     );
   }
 
-  // Server-side verification failed - not an admin
   if (!serverVerifiedAdmin) {
     return (
       <AdminLayout>
@@ -210,7 +252,10 @@ export default function AdminUsers() {
                       )}
                       <div>
                         <p className="font-medium">
-                          {userRole.user_id === user?.id ? 'Sie' : `Benutzer ${userRole.user_id.slice(0, 8)}...`}
+                          {userRole.email || `Benutzer ${userRole.user_id.slice(0, 8)}...`}
+                          {userRole.user_id === user?.id && (
+                            <span className="text-muted-foreground text-sm ml-2">(Sie)</span>
+                          )}
                         </p>
                         <Badge 
                           variant={userRole.role === 'admin' ? 'default' : 'secondary'}
@@ -221,14 +266,25 @@ export default function AdminUsers() {
                       </div>
                     </div>
                     {userRole.user_id !== user?.id && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => deleteUser(userRole)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => openEditDialog(userRole)}
+                          title="Rolle ändern"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => deleteUser(userRole)}
+                          title="Entfernen"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -272,7 +328,7 @@ export default function AdminUsers() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Mindestens 6 Zeichen"
+                placeholder="Mindestens 8 Zeichen"
               />
             </div>
             <div className="space-y-2">
@@ -297,6 +353,44 @@ export default function AdminUsers() {
                 disabled={saving}
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Erstellen'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Role Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rolle ändern</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Rolle für <strong>{editingUser?.email || 'Benutzer'}</strong> ändern:
+            </p>
+            <div className="space-y-2">
+              <Label>Neue Rolle</Label>
+              <Select value={editRole} onValueChange={(v) => setEditRole(v as 'admin' | 'staff')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border">
+                  <SelectItem value="staff">Mitarbeiter</SelectItem>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button 
+                className="bg-gold text-navy hover:bg-gold-light"
+                onClick={updateRole}
+                disabled={editSaving}
+              >
+                {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Speichern'}
               </Button>
             </div>
           </div>
