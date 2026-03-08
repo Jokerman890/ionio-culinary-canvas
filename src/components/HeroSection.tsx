@@ -27,6 +27,7 @@ export function HeroSection() {
         <h1 className="hero-animate font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 leading-tight">
           IONIO Restaurant
           <span className="block text-gold mt-2">Authentische griechische Küche</span>
+          <span className="block text-primary-foreground/70 text-xl sm:text-2xl md:text-3xl mt-3 font-light">in Ganderkesee</span>
         </h1>
         
         <p className="hero-animate hero-animate-delay-1 text-lg md:text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto font-light tracking-wide">
