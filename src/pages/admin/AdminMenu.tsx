@@ -74,6 +74,7 @@ const itemSchema = z
   .object({
     categoryId: z.string().min(1, 'Kategorie erforderlich'),
     name: z.string().trim().min(1, 'Name erforderlich'),
+    dishNumber: z.string().trim().max(20, 'Maximal 20 Zeichen').optional().or(z.literal('')),
     description: z.string().trim().max(1000, 'Maximal 1000 Zeichen').optional().or(z.literal('')),
     price: itemPriceSchema,
     allergens: z.string().optional().or(z.literal('')),
