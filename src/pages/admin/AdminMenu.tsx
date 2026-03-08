@@ -323,6 +323,7 @@ export default function AdminMenu() {
       const itemData = {
         category_id: parsed.categoryId,
         name: parsed.name,
+        dish_number: parsed.dishNumber || null,
         description: parsed.description || null,
         price: parsed.price,
         allergens: allergensArray,
