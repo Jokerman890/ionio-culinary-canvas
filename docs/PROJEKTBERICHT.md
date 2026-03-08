@@ -339,6 +339,7 @@ Skalierbarkeit    ████████████████████�
 
 | Version | Datum | Highlights |
 |---------|-------|------------|
+| 1.6.0 | 08.03.2026 | Analyse-Dashboard, Benutzerverwaltung mit E-Mails & Rollenänderung, Gerichtsnummern im Admin |
 | 1.5.0 | 07.03.2026 | Speisekarten-Suche, Kategorie-Hinweise, Vegetarisch-Flags, Hero-Fix |
 | 1.4.0 | 01.02.2026 | Sicherheits-Audit, Rate-Limiting, E2E-Scripts, Test-Abdeckung |
 | 1.3.2 | 01.02.2026 | any-Typen eliminiert, Code-Splitting, Zod-Validierung |
@@ -350,4 +351,4 @@ Skalierbarkeit    ████████████████████�
 
 ---
 
-*Dieser Bericht wurde am 7. März 2026 erstellt und basiert auf Version 1.5.0 des Projekts ionio-culinary-canvas.*
+*Dieser Bericht wurde am 8. März 2026 erstellt und basiert auf Version 1.6.0 des Projekts ionio-culinary-canvas.*
