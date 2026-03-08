@@ -1,8 +1,8 @@
 # Projektbericht: IONIO Culinary Canvas
 
 **Projekt:** ionio-culinary-canvas  
-**Version:** 1.5.0  
-**Datum:** 7. März 2026  
+**Version:** 1.6.0  
+**Datum:** 8. März 2026  
 **Status:** Produktionsreif  
 
 ---
