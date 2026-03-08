@@ -136,6 +136,7 @@ export default function AdminMenu() {
     defaultValues: {
       categoryId: '',
       name: '',
+      dishNumber: '',
       description: '',
       price: 0,
       allergens: '',
