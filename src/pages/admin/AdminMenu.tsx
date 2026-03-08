@@ -553,6 +553,9 @@ export default function AdminMenu() {
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
+                            {item.dish_number && (
+                              <span className="text-sm text-muted-foreground font-mono">{item.dish_number}</span>
+                            )}
                             <h3 className="font-medium">{item.name}</h3>
                             {item.is_vegetarian && (
                               <Badge variant="secondary" className="text-xs">Vegetarisch</Badge>
