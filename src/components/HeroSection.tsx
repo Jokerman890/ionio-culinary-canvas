@@ -25,8 +25,8 @@ export function HeroSection() {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 text-center pt-16">
         <h1 className="hero-animate font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-primary-foreground mb-6 leading-tight">
-          Authentische griechische Küche
-          <span className="block text-gold mt-2">in Ganderkesee</span>
+          IONIO Restaurant
+          <span className="block text-gold mt-2">Authentische griechische Küche</span>
         </h1>
         
         <p className="hero-animate hero-animate-delay-1 text-lg md:text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto font-light tracking-wide">
