@@ -698,21 +698,36 @@ export default function AdminMenu() {
                 <p className="text-xs text-destructive">{itemErrors.categoryId.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="item-name">Name</Label>
-              <Input
-                id="item-name"
-                value={itemName}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setItemName(value);
-                  itemForm.setValue('name', value, { shouldValidate: true });
-                }}
-                placeholder="z.B. Gyros Teller"
-              />
-              {itemErrors.name && (
-                <p className="text-xs text-destructive">{itemErrors.name.message}</p>
-              )}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="item-name">Name</Label>
+                <Input
+                  id="item-name"
+                  value={itemName}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setItemName(value);
+                    itemForm.setValue('name', value, { shouldValidate: true });
+                  }}
+                  placeholder="z.B. Gyros Teller"
+                />
+                {itemErrors.name && (
+                  <p className="text-xs text-destructive">{itemErrors.name.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="item-dish-number">Nr.</Label>
+                <Input
+                  id="item-dish-number"
+                  value={itemDishNumber}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setItemDishNumber(value);
+                    itemForm.setValue('dishNumber', value, { shouldValidate: true });
+                  }}
+                  placeholder="z.B. 42"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="item-desc">Beschreibung (optional)</Label>
