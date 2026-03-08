@@ -256,6 +256,7 @@ export default function AdminMenu() {
     if (item) {
       setEditingItem(item);
       setItemName(item.name);
+      setItemDishNumber(item.dish_number || '');
       setItemDescription(item.description || '');
       setItemPrice(item.price.toString());
       setItemAllergens(item.allergens?.join(', ') || '');
@@ -266,6 +267,7 @@ export default function AdminMenu() {
       itemForm.reset({
         categoryId: item.category_id,
         name: item.name,
+        dishNumber: item.dish_number || '',
         description: item.description || '',
         price: item.price,
         allergens: item.allergens?.join(', ') || '',
@@ -277,6 +279,7 @@ export default function AdminMenu() {
       const fallbackCategory = selectedCategory || categories[0]?.id || '';
       setEditingItem(null);
       setItemName('');
+      setItemDishNumber('');
       setItemDescription('');
       setItemPrice('');
       setItemAllergens('');
@@ -287,6 +290,7 @@ export default function AdminMenu() {
       itemForm.reset({
         categoryId: fallbackCategory,
         name: '',
+        dishNumber: '',
         description: '',
         price: 0,
         allergens: '',
