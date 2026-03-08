@@ -4,6 +4,34 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.6.0] - 2026-03-08
+
+### ✨ Neue Features
+- 📊 **Analyse-Dashboard**: Neuer Admin-Bereich mit umfassenden Besucherstatistiken
+  - Seitenaufrufe, eindeutige Besucher, Tages-/Stunden-Verteilung
+  - Geräte- und Browser-Aufschlüsselung (Donut- & Balkendiagramme)
+  - Beliebteste Seiten mit Fortschrittsbalken
+  - Zeitraumfilter (7, 30, 90 Tage)
+- 👥 **Verbesserte Benutzerverwaltung**:
+  - E-Mail-Adressen werden jetzt angezeigt (statt gekürzte User-IDs)
+  - Rollen können direkt geändert werden (Admin ↔ Mitarbeiter)
+  - Neue Edge Function `manage-users` für sichere serverseitige Benutzerabfragen
+- 🔢 **Gerichtsnummern im Admin**: Feld „Nr." im Gericht-Dialog zum Anlegen/Bearbeiten hinzugefügt
+- 📈 **Erweitertes Dashboard**: Wochenangebote-Status, Warnhinweise (nicht verfügbare Gerichte, ausgeblendete Bilder), mehr Schnellzugriffe
+
+### 🔧 Technisch
+- `page_views`-Tabelle mit RLS und Indizes für performante Abfragen
+- `get_analytics_summary()` DB-Funktion (SECURITY DEFINER) für aggregierte Statistiken
+- `usePageTracking`-Hook für automatisches, anonymes Seitenaufruf-Tracking
+- Edge Function `manage-users` mit Admin-Verifizierung und CORS
+- Recharts-Charts für Datenvisualisierung im Analyse-Bereich
+- Admin-Navigation um „Analyse"-Eintrag mit BarChart3-Icon erweitert
+
+### 🛡️ Sicherheit
+- Analytics-Insert ist bewusst öffentlich (anonymes Tracking), Lesezugriff nur für Admin/Staff
+- Rollenänderungen über Edge Function mit serverseitiger Admin-Prüfung
+- Selbst-Degradierung von Admins serverseitig verhindert
+
 ## [1.5.0] - 2026-03-07
 
 ### ✨ Neue Features

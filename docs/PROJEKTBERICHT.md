@@ -1,8 +1,8 @@
 # Projektbericht: IONIO Culinary Canvas
 
 **Projekt:** ionio-culinary-canvas  
-**Version:** 1.5.0  
-**Datum:** 7. März 2026  
+**Version:** 1.6.0  
+**Datum:** 8. März 2026  
 **Status:** Produktionsreif  
 
 ---
@@ -33,12 +33,12 @@ Das Projekt **IONIO Culinary Canvas** ist eine vollständige Webpräsenz für da
 
 ### Kernaussagen
 
-- **Projektstatus:** Version 1.5.0 ist produktionsreif und einsatzbereit
+- **Projektstatus:** Version 1.6.0 ist produktionsreif und einsatzbereit
 - **Funktionsumfang:** Alle Kernfunktionen sind implementiert und funktionsfähig
-- **Neue Features in 1.5.0:** Speisekarten-Suche, Kategorie-Hinweise mit Aufpreis-Highlighting, erweiterte Gerichtdetails
+- **Neue Features in 1.6.0:** Analyse-Dashboard mit Besucherstatistiken, verbesserte Benutzerverwaltung mit E-Mail-Anzeige und Rollenänderung, Gerichtsnummern im Admin
 - **Technische Qualität:** Professionelle Architektur mit modernem Tech-Stack
 - **Sicherheitsbewertung:** A– (Sehr gut, Rate-Limiting und RLS vollständig implementiert)
-- **Datenbankumfang:** ~194 Menü-Einträge, 6 Haupttabellen, vollständige RLS-Absicherung
+- **Datenbankumfang:** ~194 Menü-Einträge, 7 Haupttabellen, vollständige RLS-Absicherung
 
 ---
 
@@ -339,6 +339,7 @@ Skalierbarkeit    ████████████████████�
 
 | Version | Datum | Highlights |
 |---------|-------|------------|
+| 1.6.0 | 08.03.2026 | Analyse-Dashboard, Benutzerverwaltung mit E-Mails & Rollenänderung, Gerichtsnummern im Admin |
 | 1.5.0 | 07.03.2026 | Speisekarten-Suche, Kategorie-Hinweise, Vegetarisch-Flags, Hero-Fix |
 | 1.4.0 | 01.02.2026 | Sicherheits-Audit, Rate-Limiting, E2E-Scripts, Test-Abdeckung |
 | 1.3.2 | 01.02.2026 | any-Typen eliminiert, Code-Splitting, Zod-Validierung |
@@ -350,4 +351,4 @@ Skalierbarkeit    ████████████████████�
 
 ---
 
-*Dieser Bericht wurde am 7. März 2026 erstellt und basiert auf Version 1.5.0 des Projekts ionio-culinary-canvas.*
+*Dieser Bericht wurde am 8. März 2026 erstellt und basiert auf Version 1.6.0 des Projekts ionio-culinary-canvas.*
