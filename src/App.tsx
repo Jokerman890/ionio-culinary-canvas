@@ -84,6 +84,16 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/admin/analytics" 
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<div className="p-6 text-muted-foreground">Lade Admin...</div>}>
+                    <AdminAnalytics />
+                  </Suspense>
+                </ProtectedRoute>
+              } 
+            />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

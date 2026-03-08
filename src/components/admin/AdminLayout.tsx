@@ -25,6 +25,7 @@ const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Speisekarte', href: '/admin/menu', icon: UtensilsCrossed },
   { label: 'Galerie', href: '/admin/gallery', icon: ImageIcon },
+  { label: 'Analyse', href: '/admin/analytics', icon: BarChart3 },
   { label: 'Einstellungen', href: '/admin/settings', icon: Clock },
 ];
 
