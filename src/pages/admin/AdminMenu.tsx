@@ -32,6 +32,7 @@ interface MenuItem {
   category_id: string;
   name: string;
   description: string | null;
+  dish_number: string | null;
   price: number;
   allergens: string[];
   is_vegetarian: boolean;
