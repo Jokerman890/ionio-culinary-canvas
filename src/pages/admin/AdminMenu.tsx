@@ -111,6 +111,7 @@ export default function AdminMenu() {
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [itemName, setItemName] = useState('');
+  const [itemDishNumber, setItemDishNumber] = useState('');
   const [itemDescription, setItemDescription] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [itemAllergens, setItemAllergens] = useState('');
