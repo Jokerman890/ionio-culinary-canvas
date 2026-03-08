@@ -14,6 +14,7 @@ const AdminMenu = lazy(() => import("./pages/admin/AdminMenu"));
 const AdminGallery = lazy(() => import("./pages/admin/AdminGallery"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 
@@ -79,6 +80,16 @@ const App = () => (
                 <ProtectedRoute requireAdmin>
                   <Suspense fallback={<div className="p-6 text-muted-foreground">Lade Admin...</div>}>
                     <AdminUsers />
+                  </Suspense>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/analytics" 
+              element={
+                <ProtectedRoute>
+                  <Suspense fallback={<div className="p-6 text-muted-foreground">Lade Admin...</div>}>
+                    <AdminAnalytics />
                   </Suspense>
                 </ProtectedRoute>
               } 

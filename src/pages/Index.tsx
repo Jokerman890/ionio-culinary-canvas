@@ -6,8 +6,10 @@ import { GallerySection } from '@/components/GallerySection';
 import { ContactSection } from '@/components/ContactSection';
 import { Footer } from '@/components/Footer';
 import { CookieBanner } from '@/components/CookieBanner';
+import { usePageTracking } from '@/hooks/usePageTracking';
 
 const Index = () => {
+  usePageTracking('/');
   return (
     <main className="overflow-x-hidden">
       <Navigation />

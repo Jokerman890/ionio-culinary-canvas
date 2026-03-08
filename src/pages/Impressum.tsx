@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import logoImage from '@/assets/logo.png';
+import { usePageTracking } from '@/hooks/usePageTracking';
 
 const Impressum = () => {
+  usePageTracking('/impressum');
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
