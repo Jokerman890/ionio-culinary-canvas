@@ -14,6 +14,7 @@ const AdminMenu = lazy(() => import("./pages/admin/AdminMenu"));
 const AdminGallery = lazy(() => import("./pages/admin/AdminGallery"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 
