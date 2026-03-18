@@ -8,8 +8,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Loader2, Upload, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Upload, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 import { getUserFriendlyError } from '@/lib/errorMessages';
+
+// Static website images
+import galleryInterior from '@/assets/gallery-interior.jpg';
+import gallerySalad from '@/assets/gallery-salad.jpg';
+import galleryGrill from '@/assets/gallery-grill.jpg';
+import galleryDessert from '@/assets/gallery-dessert.jpg';
+import dishMeat from '@/assets/dish-meat.jpg';
+import dishFish from '@/assets/dish-fish.jpg';
+
+const staticWebsiteImages = [
+  { src: galleryInterior, alt: 'Restaurant Innenraum' },
+  { src: gallerySalad, alt: 'Griechischer Salat' },
+  { src: galleryGrill, alt: 'Grill' },
+  { src: dishMeat, alt: 'Lammkoteletts' },
+  { src: galleryDessert, alt: 'Baklava' },
+  { src: dishFish, alt: 'Gegrillter Fisch' },
+];
 
 interface GalleryImage {
   id: string;
@@ -233,12 +250,45 @@ export default function AdminGallery() {
           </div>
         </div>
 
+        {/* Static Website Images */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-gold" />
+            <h2 className="font-serif text-xl text-foreground">Website-Bilder (fest eingebaut)</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Diese Bilder sind fest in der Website integriert und werden immer in der Galerie angezeigt.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {staticWebsiteImages.map((image) => (
+              <Card key={image.alt} className="overflow-hidden border-border/50">
+                <div className="aspect-square relative">
+                  <img 
+                    src={image.src} 
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <CardContent className="p-3">
+                  <p className="text-sm truncate">{image.alt}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Uploaded Images */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Upload className="w-5 h-5 text-gold" />
+            <h2 className="font-serif text-xl text-foreground">Hochgeladene Bilder</h2>
+          </div>
         {images.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-16 text-center">
               <Upload className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground">
-                Noch keine Bilder vorhanden. Laden Sie Ihre ersten Fotos hoch.
+                Noch keine zusätzlichen Bilder hochgeladen.
               </p>
             </CardContent>
           </Card>
@@ -288,6 +338,7 @@ export default function AdminGallery() {
             ))}
           </div>
         )}
+        </div>
       </div>
 
       {/* Edit Dialog */}
