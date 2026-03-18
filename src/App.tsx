@@ -9,6 +9,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminMenu = lazy(() => import("./pages/admin/AdminMenu"));
 const AdminGallery = lazy(() => import("./pages/admin/AdminGallery"));
