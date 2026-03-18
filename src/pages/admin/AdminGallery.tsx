@@ -7,8 +7,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Loader2, Upload, Eye, EyeOff, RefreshCw, Plus } from 'lucide-react';
+import { Pencil, Trash2, Loader2, Upload, Eye, EyeOff, RefreshCw, Plus, Download } from 'lucide-react';
 import { getUserFriendlyError } from '@/lib/errorMessages';
+
+// Static default images
+import galleryInterior from '@/assets/gallery-interior.jpg';
+import gallerySalad from '@/assets/gallery-salad.jpg';
+import galleryGrill from '@/assets/gallery-grill.jpg';
+import galleryDessert from '@/assets/gallery-dessert.jpg';
+import dishMeat from '@/assets/dish-meat.jpg';
+import dishFish from '@/assets/dish-fish.jpg';
+
+const defaultImages = [
+  { src: galleryInterior, alt: 'Restaurant Innenraum' },
+  { src: gallerySalad, alt: 'Griechischer Salat' },
+  { src: galleryGrill, alt: 'Grill' },
+  { src: dishMeat, alt: 'Lammkoteletts' },
+  { src: galleryDessert, alt: 'Baklava' },
+  { src: dishFish, alt: 'Gegrillter Fisch' },
+];
 
 interface GalleryImage {
   id: string;
@@ -24,9 +41,47 @@ export default function AdminGallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [replacingId, setReplacingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  const importDefaultImages = async () => {
+    setImporting(true);
+    try {
+      for (let i = 0; i < defaultImages.length; i++) {
+        const img = defaultImages[i];
+        // Fetch the static image as blob
+        const response = await fetch(img.src);
+        const blob = await response.blob();
+        
+        const fileName = `default-${Date.now()}-${i}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('gallery')
+          .upload(fileName, blob, { contentType: 'image/jpeg' });
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(fileName);
+
+        const { error: dbError } = await supabase
+          .from('gallery_images')
+          .insert({
+            image_url: urlData.publicUrl,
+            title: img.alt,
+            sort_order: i,
+            is_visible: true,
+          });
+        if (dbError) throw dbError;
+      }
+      toast({ title: 'Standardbilder importiert' });
+      fetchImages();
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminGallery.importDefaultImages');
+      toast({ title: 'Import fehlgeschlagen', description: message, variant: 'destructive' });
+    } finally {
+      setImporting(false);
+    }
+  };
   
   // Edit dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -257,17 +312,41 @@ export default function AdminGallery() {
         </div>
 
         {images.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="py-16 text-center">
-              <Upload className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">
-                Noch keine Bilder vorhanden. Laden Sie Ihre ersten Fotos hoch.
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Solange keine Bilder hochgeladen sind, werden die Standard-Bilder auf der Website angezeigt.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <Card className="border-dashed">
+              <CardContent className="py-8 text-center space-y-4">
+                <Download className="w-12 h-12 mx-auto text-gold/50" />
+                <p className="text-muted-foreground">
+                  Die aktuellen Standard-Bilder der Website. Importieren Sie diese, um sie bearbeiten und austauschen zu können.
+                </p>
+                <Button
+                  className="bg-gold text-navy hover:bg-gold-light"
+                  onClick={importDefaultImages}
+                  disabled={importing}
+                >
+                  {importing ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Standardbilder importieren
+                </Button>
+              </CardContent>
+            </Card>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {defaultImages.map((image) => (
+                <Card key={image.alt} className="overflow-hidden border-border/50 opacity-70">
+                  <div className="aspect-square relative">
+                    <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+                  </div>
+                  <CardContent className="p-3">
+                    <p className="text-sm truncate">{image.alt}</p>
+                    <p className="text-xs text-muted-foreground">Standard</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {images.map(image => (
