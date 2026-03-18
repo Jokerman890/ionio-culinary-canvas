@@ -119,8 +119,8 @@ export default function ResetPassword() {
         <CardContent>
           {isSuccess ? (
             <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-green-500/10 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-green-500" />
+              <div className="w-16 h-16 mx-auto bg-gold/10 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-gold" />
               </div>
               <p className="text-muted-foreground">
                 Ihr Passwort wurde erfolgreich geändert. Sie werden zur Anmeldung weitergeleitet...
