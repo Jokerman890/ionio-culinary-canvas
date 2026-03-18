@@ -17,6 +17,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 
 const createCountResponse = (count: number) => ({ count, error: null });
+const createDataResponse = (data: unknown[]) => ({ data, error: null });
 
 describe("AdminDashboard", () => {
   beforeEach(() => {
@@ -26,14 +27,23 @@ describe("AdminDashboard", () => {
 
   it("lädt Statistiken und zeigt die Werte an", async () => {
     const responseQueue = [
-      Promise.resolve(createCountResponse(12)),
-      Promise.resolve(createCountResponse(4)),
-      Promise.resolve(createCountResponse(7)),
-      Promise.resolve(createCountResponse(3)),
+      Promise.resolve(createCountResponse(12)),   // menu_items count
+      Promise.resolve(createCountResponse(4)),     // menu_categories count
+      Promise.resolve(createCountResponse(7)),     // gallery_images count
+      Promise.resolve(createCountResponse(3)),     // user_roles count
+      Promise.resolve(createDataResponse([])),     // weekly_offers data
+      Promise.resolve(createCountResponse(0)),     // unavailable items
+      Promise.resolve(createCountResponse(0)),     // hidden images
     ];
 
     mockFrom.mockReturnValue({
-      select: vi.fn(() => responseQueue.shift()),
+      select: vi.fn(() => {
+        const p = responseQueue.shift() ?? Promise.resolve(createCountResponse(0));
+        return Object.assign(p, {
+          order: vi.fn(() => p),
+          eq: vi.fn(() => p),
+        });
+      }),
     });
 
     render(
@@ -54,10 +64,19 @@ describe("AdminDashboard", () => {
       Promise.resolve(createCountResponse(1)),
       Promise.resolve(createCountResponse(1)),
       Promise.resolve(createCountResponse(1)),
+      Promise.resolve(createDataResponse([])),
+      Promise.resolve(createCountResponse(0)),
+      Promise.resolve(createCountResponse(0)),
     ];
 
     mockFrom.mockReturnValue({
-      select: vi.fn(() => responseQueue.shift()),
+      select: vi.fn(() => {
+        const p = responseQueue.shift() ?? Promise.resolve(createCountResponse(0));
+        return Object.assign(p, {
+          order: vi.fn(() => p),
+          eq: vi.fn(() => p),
+        });
+      }),
     });
 
     render(
