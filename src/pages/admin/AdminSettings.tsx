@@ -162,9 +162,9 @@ export default function AdminSettings() {
       const values = settingsSchema.parse(getValues());
       // Update all settings using upsert
       const updates = [
-        { key: 'phone', value: values.phone as unknown },
-        { key: 'address', value: values.address as unknown },
-        { key: 'opening_hours', value: values.openingHours as unknown },
+        { key: 'phone', value: values.phone as unknown, is_public: true },
+        { key: 'address', value: values.address as unknown, is_public: true },
+        { key: 'opening_hours', value: values.openingHours as unknown, is_public: true },
       ];
 
       for (const update of updates) {
