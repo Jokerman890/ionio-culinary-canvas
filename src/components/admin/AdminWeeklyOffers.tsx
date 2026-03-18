@@ -280,7 +280,23 @@ export function AdminWeeklyOffers() {
                     control={control}
                     name={`offers.${index}.is_active` as const}
                     render={({ field }) => (
-                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={async (checked) => {
+                          field.onChange(checked);
+                          try {
+                            const offerId = getValues(`offers.${index}.id`);
+                            await supabase
+                              .from('weekly_offers')
+                              .update({ is_active: checked })
+                              .eq('id', offerId);
+                            toast({ title: checked ? 'Angebot aktiviert' : 'Angebot deaktiviert' });
+                          } catch (err) {
+                            field.onChange(!checked);
+                            toast({ title: 'Fehler beim Speichern', variant: 'destructive' });
+                          }
+                        }}
+                      />
                     )}
                   />
                 </div>
