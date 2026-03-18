@@ -33,9 +33,9 @@ Das Projekt **IONIO Culinary Canvas** ist eine vollständige Webpräsenz für da
 
 ### Kernaussagen
 
-- **Projektstatus:** Version 1.6.0 ist produktionsreif und einsatzbereit
+- **Projektstatus:** Version 1.7.0 ist produktionsreif und einsatzbereit
 - **Funktionsumfang:** Alle Kernfunktionen sind implementiert und funktionsfähig
-- **Neue Features in 1.6.0:** Analyse-Dashboard mit Besucherstatistiken, verbesserte Benutzerverwaltung mit E-Mail-Anzeige und Rollenänderung, Gerichtsnummern im Admin
+- **Neue Features in 1.7.0:** Galerie-Verwaltung mit Import/Ersetzen, Passwort-Sichtbarkeit im Login, kompletter Passwort-Vergessen-Flow
 - **Technische Qualität:** Professionelle Architektur mit modernem Tech-Stack
 - **Sicherheitsbewertung:** A– (Sehr gut, Rate-Limiting und RLS vollständig implementiert)
 - **Datenbankumfang:** ~194 Menü-Einträge, 7 Haupttabellen, vollständige RLS-Absicherung
