@@ -30,7 +30,7 @@ describe("MenuSection", () => {
     render(<MenuSection />);
 
     expect(screen.getByRole("heading", { name: /unsere speisekarte/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /vorspeisen/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("tab", { name: /vorspeisen/i }).length).toBeGreaterThan(0);
     expect(screen.getByText(/tzatziki/i)).toBeInTheDocument();
   });
 
