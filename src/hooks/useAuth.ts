@@ -65,7 +65,6 @@ export function useAuth() {
     }
   };
 
-  /* temp debug: bypass edge function */
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.functions.invoke('login-rate-limited', {
       body: { email, password },
@@ -79,7 +78,17 @@ export function useAuth() {
       return { error: new Error(data.error) };
     }
 
-    return { error: null };
+    const session = data?.data?.session;
+    if (!session?.access_token || !session?.refresh_token) {
+      return { error: new Error('Anmeldung fehlgeschlagen') };
+    }
+
+    const { error: sessionError } = await supabase.auth.setSession({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    });
+
+    return { error: sessionError };
   };
 
   const signUp = async (email: string, password: string) => {
