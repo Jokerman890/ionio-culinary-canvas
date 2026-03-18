@@ -250,12 +250,45 @@ export default function AdminGallery() {
           </div>
         </div>
 
+        {/* Static Website Images */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-gold" />
+            <h2 className="font-serif text-xl text-foreground">Website-Bilder (fest eingebaut)</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Diese Bilder sind fest in der Website integriert und werden immer in der Galerie angezeigt.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {staticWebsiteImages.map((image) => (
+              <Card key={image.alt} className="overflow-hidden border-border/50">
+                <div className="aspect-square relative">
+                  <img 
+                    src={image.src} 
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <CardContent className="p-3">
+                  <p className="text-sm truncate">{image.alt}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Uploaded Images */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Upload className="w-5 h-5 text-gold" />
+            <h2 className="font-serif text-xl text-foreground">Hochgeladene Bilder</h2>
+          </div>
         {images.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-16 text-center">
               <Upload className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground">
-                Noch keine Bilder vorhanden. Laden Sie Ihre ersten Fotos hoch.
+                Noch keine zusätzlichen Bilder hochgeladen.
               </p>
             </CardContent>
           </Card>
@@ -305,6 +338,7 @@ export default function AdminGallery() {
             ))}
           </div>
         )}
+        </div>
       </div>
 
       {/* Edit Dialog */}
