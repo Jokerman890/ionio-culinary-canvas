@@ -8,8 +8,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Loader2, Upload, Eye, EyeOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Upload, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 import { getUserFriendlyError } from '@/lib/errorMessages';
+
+// Static website images
+import galleryInterior from '@/assets/gallery-interior.jpg';
+import gallerySalad from '@/assets/gallery-salad.jpg';
+import galleryGrill from '@/assets/gallery-grill.jpg';
+import galleryDessert from '@/assets/gallery-dessert.jpg';
+import dishMeat from '@/assets/dish-meat.jpg';
+import dishFish from '@/assets/dish-fish.jpg';
+
+const staticWebsiteImages = [
+  { src: galleryInterior, alt: 'Restaurant Innenraum' },
+  { src: gallerySalad, alt: 'Griechischer Salat' },
+  { src: galleryGrill, alt: 'Grill' },
+  { src: dishMeat, alt: 'Lammkoteletts' },
+  { src: galleryDessert, alt: 'Baklava' },
+  { src: dishFish, alt: 'Gegrillter Fisch' },
+];
 
 interface GalleryImage {
   id: string;
