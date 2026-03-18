@@ -1,8 +1,8 @@
 # Projektbericht: IONIO Culinary Canvas
 
 **Projekt:** ionio-culinary-canvas  
-**Version:** 1.6.0  
-**Datum:** 8. März 2026  
+**Version:** 1.7.0  
+**Datum:** 18. März 2026  
 **Status:** Produktionsreif  
 
 ---
@@ -33,9 +33,9 @@ Das Projekt **IONIO Culinary Canvas** ist eine vollständige Webpräsenz für da
 
 ### Kernaussagen
 
-- **Projektstatus:** Version 1.6.0 ist produktionsreif und einsatzbereit
+- **Projektstatus:** Version 1.7.0 ist produktionsreif und einsatzbereit
 - **Funktionsumfang:** Alle Kernfunktionen sind implementiert und funktionsfähig
-- **Neue Features in 1.6.0:** Analyse-Dashboard mit Besucherstatistiken, verbesserte Benutzerverwaltung mit E-Mail-Anzeige und Rollenänderung, Gerichtsnummern im Admin
+- **Neue Features in 1.7.0:** Galerie-Verwaltung mit Import/Ersetzen, Passwort-Sichtbarkeit im Login, kompletter Passwort-Vergessen-Flow
 - **Technische Qualität:** Professionelle Architektur mit modernem Tech-Stack
 - **Sicherheitsbewertung:** A– (Sehr gut, Rate-Limiting und RLS vollständig implementiert)
 - **Datenbankumfang:** ~194 Menü-Einträge, 7 Haupttabellen, vollständige RLS-Absicherung
@@ -57,6 +57,8 @@ Das Projekt **IONIO Culinary Canvas** ist eine vollständige Webpräsenz für da
 | Kontaktbereich | Kontaktinformationen und Standort | ✅ Erreicht |
 | Admin-Dashboard | Backend zur Content-Verwaltung | ✅ Erreicht |
 | DSGVO-Konformität | Datenschutzkonforme Implementierung | ✅ Erreicht |
+| Galerie-Verwaltung | Admin kann Bilder importieren, ersetzen und editieren | ✅ Erreicht (v1.7.0) |
+| Passwort-Recovery | Kompletter Passwort-Vergessen-Flow | ✅ Erreicht (v1.7.0) |
 
 ### Erreichungsgrad: 100%
 
@@ -339,6 +341,7 @@ Skalierbarkeit    ████████████████████�
 
 | Version | Datum | Highlights |
 |---------|-------|------------|
+| 1.7.0 | 18.03.2026 | Galerie-Verwaltung (Import/Ersetzen/Editieren), Passwort-Sichtbarkeit, Passwort-Vergessen-Flow |
 | 1.6.0 | 08.03.2026 | Analyse-Dashboard, Benutzerverwaltung mit E-Mails & Rollenänderung, Gerichtsnummern im Admin |
 | 1.5.0 | 07.03.2026 | Speisekarten-Suche, Kategorie-Hinweise, Vegetarisch-Flags, Hero-Fix |
 | 1.4.0 | 01.02.2026 | Sicherheits-Audit, Rate-Limiting, E2E-Scripts, Test-Abdeckung |
@@ -351,4 +354,4 @@ Skalierbarkeit    ████████████████████�
 
 ---
 
-*Dieser Bericht wurde am 8. März 2026 erstellt und basiert auf Version 1.6.0 des Projekts ionio-culinary-canvas.*
+*Dieser Bericht wurde am 18. März 2026 aktualisiert und basiert auf Version 1.7.0 des Projekts ionio-culinary-canvas.*
