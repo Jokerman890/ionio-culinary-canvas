@@ -26,11 +26,10 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     )
 
-    const token = authHeader.replace('Bearer ', '')
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token)
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
     
-    if (claimsError || !claimsData?.claims) {
-      console.log('Failed to verify token:', claimsError?.message)
+    if (userError || !user) {
+      console.log('Failed to verify token:', userError?.message)
       return new Response(
         JSON.stringify({ isAdmin: false, error: 'Invalid token' }),
         {
@@ -40,7 +39,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const userId = claimsData.claims.sub
+    const userId = user.id
     console.log('Verifying admin status for user:', userId)
 
     // Use the has_role database function for consistent role checking
