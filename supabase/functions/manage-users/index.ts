@@ -2,8 +2,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 
 Deno.serve(async (req: Request) => {
+  const origin = req.headers.get("Origin");
+  const hdrs = corsHeaders(origin);
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: hdrs });
   }
 
   try {
@@ -11,7 +14,7 @@ Deno.serve(async (req: Request) => {
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...hdrs, "Content-Type": "application/json" },
       });
     }
 
@@ -27,7 +30,7 @@ Deno.serve(async (req: Request) => {
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...hdrs, "Content-Type": "application/json" },
       });
     }
 
@@ -43,15 +46,13 @@ Deno.serve(async (req: Request) => {
     if (!roleData) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...hdrs, "Content-Type": "application/json" },
       });
     }
 
     const method = req.method;
-    const url = new URL(req.url);
 
     if (method === "GET") {
-      // Get all user roles with emails
       const { data: roles, error: rolesError } = await adminClient
         .from("user_roles")
         .select("*")
@@ -59,7 +60,6 @@ Deno.serve(async (req: Request) => {
 
       if (rolesError) throw rolesError;
 
-      // Fetch emails for each user
       const userIds = [...new Set((roles || []).map((r: { user_id: string }) => r.user_id))];
       const usersWithEmails = await Promise.all(
         userIds.map(async (uid: string) => {
@@ -76,21 +76,19 @@ Deno.serve(async (req: Request) => {
       }));
 
       return new Response(JSON.stringify(enrichedRoles), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...hdrs, "Content-Type": "application/json" },
       });
     }
 
     if (method === "PATCH") {
-      // Update user role
       const { roleId, newRole } = await req.json();
       if (!roleId || !["admin", "staff"].includes(newRole)) {
         return new Response(JSON.stringify({ error: "Invalid input" }), {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...hdrs, "Content-Type": "application/json" },
         });
       }
 
-      // Prevent self-demotion
       const { data: targetRole } = await adminClient
         .from("user_roles")
         .select("user_id")
@@ -100,7 +98,7 @@ Deno.serve(async (req: Request) => {
       if (targetRole?.user_id === user.id) {
         return new Response(JSON.stringify({ error: "Cannot change own role" }), {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...hdrs, "Content-Type": "application/json" },
         });
       }
 
@@ -112,19 +110,19 @@ Deno.serve(async (req: Request) => {
       if (updateError) throw updateError;
 
       return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...hdrs, "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...hdrs, "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...hdrs, "Content-Type": "application/json" },
     });
   }
 });
