@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { supabase } from '@/integrations/supabase/client';
+
+// Static fallback images
 import galleryInterior from '@/assets/gallery-interior.jpg';
 import gallerySalad from '@/assets/gallery-salad.jpg';
 import galleryGrill from '@/assets/gallery-grill.jpg';
@@ -8,7 +11,7 @@ import galleryDessert from '@/assets/gallery-dessert.jpg';
 import dishMeat from '@/assets/dish-meat.jpg';
 import dishFish from '@/assets/dish-fish.jpg';
 
-const images = [
+const fallbackImages = [
   { src: galleryInterior, alt: 'Restaurant Innenraum' },
   { src: gallerySalad, alt: 'Griechischer Salat' },
   { src: galleryGrill, alt: 'Grill' },
@@ -17,10 +20,31 @@ const images = [
   { src: dishFish, alt: 'Gegrillter Fisch' },
 ];
 
+interface GalleryImageData {
+  src: string;
+  alt: string;
+}
+
 export function GallerySection() {
+  const [images, setImages] = useState<GalleryImageData[]>(fallbackImages);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [isClosing, setIsClosing] = useState(false);
   const { ref: titleRef, isRevealed: titleRevealed } = useScrollReveal<HTMLDivElement>();
+
+  useEffect(() => {
+    async function fetchImages() {
+      const { data, error } = await supabase
+        .from('gallery_images')
+        .select('image_url, title')
+        .eq('is_visible', true)
+        .order('sort_order');
+
+      if (!error && data && data.length > 0) {
+        setImages(data.map(img => ({ src: img.image_url, alt: img.title || 'Galerie' })));
+      }
+    }
+    fetchImages();
+  }, []);
 
   const closeLightbox = () => {
     setIsClosing(true);
@@ -48,7 +72,7 @@ export function GallerySection() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {images.map((image, index) => (
             <GalleryImage 
-              key={image.src} 
+              key={`${image.src}-${index}`}
               image={image} 
               index={index}
               onClick={() => setLightboxImage(image.src)}
@@ -89,7 +113,7 @@ function GalleryImage({
   index, 
   onClick 
 }: { 
-  image: typeof images[0]; 
+  image: GalleryImageData; 
   index: number;
   onClick: () => void;
 }) {

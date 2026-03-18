@@ -5,28 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Loader2, Upload, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
+import { Pencil, Trash2, Loader2, Upload, Eye, EyeOff, RefreshCw, Plus } from 'lucide-react';
 import { getUserFriendlyError } from '@/lib/errorMessages';
-
-// Static website images
-import galleryInterior from '@/assets/gallery-interior.jpg';
-import gallerySalad from '@/assets/gallery-salad.jpg';
-import galleryGrill from '@/assets/gallery-grill.jpg';
-import galleryDessert from '@/assets/gallery-dessert.jpg';
-import dishMeat from '@/assets/dish-meat.jpg';
-import dishFish from '@/assets/dish-fish.jpg';
-
-const staticWebsiteImages = [
-  { src: galleryInterior, alt: 'Restaurant Innenraum' },
-  { src: gallerySalad, alt: 'Griechischer Salat' },
-  { src: galleryGrill, alt: 'Grill' },
-  { src: dishMeat, alt: 'Lammkoteletts' },
-  { src: galleryDessert, alt: 'Baklava' },
-  { src: dishFish, alt: 'Gegrillter Fisch' },
-];
 
 interface GalleryImage {
   id: string;
@@ -42,7 +24,9 @@ export default function AdminGallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [replacingId, setReplacingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
   
   // Edit dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -73,55 +57,39 @@ export default function AdminGallery() {
     }
   }
 
+  const uploadToStorage = async (file: File): Promise<string> => {
+    if (!file.type.startsWith('image/')) throw new Error(`${file.name} ist kein Bild`);
+    if (file.size > 5 * 1024 * 1024) throw new Error(`${file.name} ist zu groß (max. 5MB)`);
+
+    const ext = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage.from('gallery').upload(fileName, file);
+    if (uploadError) throw uploadError;
+
+    const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(fileName);
+    return urlData.publicUrl;
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
-    
     try {
       for (const file of Array.from(files)) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-          toast({ title: `${file.name} ist kein Bild`, variant: 'destructive' });
-          continue;
-        }
+        const publicUrl = await uploadToStorage(file);
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toast({ title: `${file.name} ist zu groß (max. 5MB)`, variant: 'destructive' });
-          continue;
-        }
-
-        // Generate unique filename
-        const ext = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-
-        // Upload to storage
-        const { error: uploadError } = await supabase.storage
-          .from('gallery')
-          .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('gallery')
-          .getPublicUrl(fileName);
-
-        // Save to database
         const { error: dbError } = await supabase
           .from('gallery_images')
           .insert({
-            image_url: urlData.publicUrl,
+            image_url: publicUrl,
             title: file.name.replace(/\.[^.]+$/, ''),
             sort_order: images.length,
             is_visible: true,
           });
-
         if (dbError) throw dbError;
       }
-
       toast({ title: 'Bilder hochgeladen' });
       fetchImages();
     } catch (error: unknown) {
@@ -129,9 +97,42 @@ export default function AdminGallery() {
       toast({ title: 'Upload fehlgeschlagen', description: message, variant: 'destructive' });
     } finally {
       setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleReplaceImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !replacingId) return;
+
+    const file = files[0];
+    setSaving(true);
+    try {
+      const publicUrl = await uploadToStorage(file);
+
+      // Delete old file from storage
+      const image = images.find(i => i.id === replacingId);
+      if (image) {
+        const urlParts = image.image_url.split('/');
+        const oldFileName = urlParts[urlParts.length - 1];
+        await supabase.storage.from('gallery').remove([oldFileName]);
       }
+
+      const { error } = await supabase
+        .from('gallery_images')
+        .update({ image_url: publicUrl })
+        .eq('id', replacingId);
+
+      if (error) throw error;
+      toast({ title: 'Bild ersetzt' });
+      fetchImages();
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminGallery.handleReplaceImage');
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+      setReplacingId(null);
+      if (replaceInputRef.current) replaceInputRef.current.value = '';
     }
   };
 
@@ -144,15 +145,11 @@ export default function AdminGallery() {
 
   const saveEdit = async () => {
     if (!editingImage) return;
-
     setSaving(true);
     try {
       const { error } = await supabase
         .from('gallery_images')
-        .update({ 
-          title: editTitle || null, 
-          description: editDescription || null 
-        })
+        .update({ title: editTitle || null, description: editDescription || null })
         .eq('id', editingImage.id);
 
       if (error) throw error;
@@ -184,21 +181,12 @@ export default function AdminGallery() {
 
   const deleteImage = async (image: GalleryImage) => {
     if (!confirm('Bild endgültig löschen?')) return;
-
     try {
-      // Extract filename from URL
       const urlParts = image.image_url.split('/');
       const fileName = urlParts[urlParts.length - 1];
-
-      // Delete from storage
       await supabase.storage.from('gallery').remove([fileName]);
 
-      // Delete from database
-      const { error } = await supabase
-        .from('gallery_images')
-        .delete()
-        .eq('id', image.id);
-
+      const { error } = await supabase.from('gallery_images').delete().eq('id', image.id);
       if (error) throw error;
       toast({ title: 'Bild gelöscht' });
       fetchImages();
@@ -206,6 +194,11 @@ export default function AdminGallery() {
       const message = getUserFriendlyError(error, 'AdminGallery.deleteImage');
       toast({ title: 'Fehler', description: message, variant: 'destructive' });
     }
+  };
+
+  const startReplace = (imageId: string) => {
+    setReplacingId(imageId);
+    setTimeout(() => replaceInputRef.current?.click(), 50);
   };
 
   if (loading) {
@@ -224,15 +217,28 @@ export default function AdminGallery() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="font-serif text-3xl text-foreground">Galerie</h1>
-            <p className="text-muted-foreground mt-1">Verwalten Sie Ihre Fotos</p>
+            <p className="text-muted-foreground mt-1">
+              Verwalten Sie die Bilder, die auf der Website angezeigt werden.
+            </p>
           </div>
-          <div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={fetchImages}>
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Aktualisieren
+            </Button>
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
               multiple
               onChange={handleFileUpload}
+              className="hidden"
+            />
+            <input
+              ref={replaceInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleReplaceImage}
               className="hidden"
             />
             <Button 
@@ -243,52 +249,22 @@ export default function AdminGallery() {
               {uploading ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
-                <Upload className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-2" />
               )}
-              Bilder hochladen
+              Bild hinzufügen
             </Button>
           </div>
         </div>
 
-        {/* Static Website Images */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <ImageIcon className="w-5 h-5 text-gold" />
-            <h2 className="font-serif text-xl text-foreground">Website-Bilder (fest eingebaut)</h2>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Diese Bilder sind fest in der Website integriert und werden immer in der Galerie angezeigt.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {staticWebsiteImages.map((image) => (
-              <Card key={image.alt} className="overflow-hidden border-border/50">
-                <div className="aspect-square relative">
-                  <img 
-                    src={image.src} 
-                    alt={image.alt}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <CardContent className="p-3">
-                  <p className="text-sm truncate">{image.alt}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Uploaded Images */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Upload className="w-5 h-5 text-gold" />
-            <h2 className="font-serif text-xl text-foreground">Hochgeladene Bilder</h2>
-          </div>
         {images.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-16 text-center">
               <Upload className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground">
-                Noch keine zusätzlichen Bilder hochgeladen.
+                Noch keine Bilder vorhanden. Laden Sie Ihre ersten Fotos hoch.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Solange keine Bilder hochgeladen sind, werden die Standard-Bilder auf der Website angezeigt.
               </p>
             </CardContent>
           </Card>
@@ -305,40 +281,58 @@ export default function AdminGallery() {
                     alt={image.title || 'Gallery image'}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <Button 
-                      size="icon" 
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    <div className="flex gap-2">
+                      <Button 
+                        size="icon" 
+                        variant="secondary"
+                        onClick={() => toggleVisibility(image)}
+                        title={image.is_visible ? 'Ausblenden' : 'Anzeigen'}
+                      >
+                        {image.is_visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                      <Button 
+                        size="icon" 
+                        variant="secondary"
+                        onClick={() => openEditDialog(image)}
+                        title="Bearbeiten"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        size="icon" 
+                        variant="destructive"
+                        onClick={() => deleteImage(image)}
+                        title="Löschen"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <Button
+                      size="sm"
                       variant="secondary"
-                      onClick={() => toggleVisibility(image)}
+                      onClick={() => startReplace(image.id)}
+                      className="text-xs"
                     >
-                      {image.is_visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      variant="secondary"
-                      onClick={() => openEditDialog(image)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      size="icon" 
-                      variant="destructive"
-                      onClick={() => deleteImage(image)}
-                    >
-                      <Trash2 className="w-4 h-4" />
+                      <Upload className="w-3 h-3 mr-1" />
+                      Bild ersetzen
                     </Button>
                   </div>
                 </div>
-                {image.title && (
-                  <CardContent className="p-3">
-                    <p className="text-sm truncate">{image.title}</p>
-                  </CardContent>
-                )}
+                <CardContent className="p-3">
+                  <p className="text-sm truncate">{image.title || 'Ohne Titel'}</p>
+                  {!image.is_visible && (
+                    <p className="text-xs text-muted-foreground">Ausgeblendet</p>
+                  )}
+                </CardContent>
               </Card>
             ))}
           </div>
         )}
-        </div>
+
+        <p className="text-sm text-muted-foreground text-center">
+          Die sichtbaren Bilder werden in der Galerie auf der Website angezeigt. Solange keine Bilder hochgeladen sind, werden Standard-Bilder verwendet.
+        </p>
       </div>
 
       {/* Edit Dialog */}
