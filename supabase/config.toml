@@ -4,8 +4,8 @@
 project_id = "uuohpodkgblvjrhvfldl"
 
 [functions.verify-admin]
-# verify-admin is security-sensitive → require a valid JWT.
-verify_jwt = true
+# JWT validation happens in code via getUser() — gateway verify must be off for ES256 tokens.
+verify_jwt = false
 
 [functions.login-rate-limited]
 # This endpoint is used before login → no JWT available.
