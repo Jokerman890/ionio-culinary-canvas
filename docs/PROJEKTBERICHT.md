@@ -352,4 +352,4 @@ Skalierbarkeit    ████████████████████�
 
 ---
 
-*Dieser Bericht wurde am 8. März 2026 erstellt und basiert auf Version 1.6.0 des Projekts ionio-culinary-canvas.*
+*Dieser Bericht wurde am 18. März 2026 aktualisiert und basiert auf Version 1.7.0 des Projekts ionio-culinary-canvas.*

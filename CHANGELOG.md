@@ -4,6 +4,30 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.7.0] - 2026-03-18
+
+### ✨ Neue Features
+- 🖼️ **Galerie-Verwaltung erweitert**: Feste Website-Bilder sind im Admin sichtbar und können importiert, ersetzt und bearbeitet werden
+  - „Standardbilder importieren"-Funktion lädt statische Assets in die Datenbank
+  - Bild-Ersetzen-Button für jedes Galerie-Bild (Upload mit Vorschau)
+  - Sichtbarkeit, Titel und Beschreibung editierbar
+  - Öffentliche Galerie lädt Bilder aus der Datenbank mit Fallback auf statische Assets
+- 👁️ **Passwort-Sichtbarkeit**: Auge-Icon im Admin-Login zum Ein-/Ausblenden des Passworts
+- 🔑 **Passwort-Vergessen-Flow**: Komplette Implementierung mit E-Mail-Link und Reset-Seite
+  - „Passwort vergessen?"-Link im Login-Formular
+  - Eigene Seite `/admin/forgot-password` für Reset-Anfrage
+  - Seite `/reset-password` zum Setzen eines neuen Passworts
+
+### 🔧 Technisch
+- Neue Routen: `/admin/forgot-password`, `/reset-password`
+- Supabase Storage-Integration für Galerie-Uploads (max 5 MB)
+- `GallerySection` nutzt jetzt `gallery_images`-Tabelle mit statischem Fallback
+- Passwort-Recovery über `supabase.auth.resetPasswordForEmail` und `PASSWORD_RECOVERY`-Event
+
+### 🛡️ Sicherheit
+- Passwort-Reset nur über verifizierte E-Mail-Adressen
+- Galerie-Uploads auf Bildformate und 5 MB begrenzt
+
 ## [1.6.0] - 2026-03-08
 
 ### ✨ Neue Features
