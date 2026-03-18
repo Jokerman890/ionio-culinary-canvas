@@ -41,9 +41,47 @@ export default function AdminGallery() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [replacingId, setReplacingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  const importDefaultImages = async () => {
+    setImporting(true);
+    try {
+      for (let i = 0; i < defaultImages.length; i++) {
+        const img = defaultImages[i];
+        // Fetch the static image as blob
+        const response = await fetch(img.src);
+        const blob = await response.blob();
+        
+        const fileName = `default-${Date.now()}-${i}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('gallery')
+          .upload(fileName, blob, { contentType: 'image/jpeg' });
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(fileName);
+
+        const { error: dbError } = await supabase
+          .from('gallery_images')
+          .insert({
+            image_url: urlData.publicUrl,
+            title: img.alt,
+            sort_order: i,
+            is_visible: true,
+          });
+        if (dbError) throw dbError;
+      }
+      toast({ title: 'Standardbilder importiert' });
+      fetchImages();
+    } catch (error: unknown) {
+      const message = getUserFriendlyError(error, 'AdminGallery.importDefaultImages');
+      toast({ title: 'Import fehlgeschlagen', description: message, variant: 'destructive' });
+    } finally {
+      setImporting(false);
+    }
+  };
   
   // Edit dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
