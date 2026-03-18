@@ -1,21 +1,24 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAuth } from "@/hooks/useAuth";
 
 const mockGetSession = vi.hoisted(() => vi.fn());
 const mockOnAuthStateChange = vi.hoisted(() => vi.fn());
 const mockFrom = vi.hoisted(() => vi.fn());
+const mockInvoke = vi.hoisted(() => vi.fn());
+const mockSetSession = vi.hoisted(() => vi.fn());
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     auth: {
       onAuthStateChange: (...args: unknown[]) => mockOnAuthStateChange(...args),
       getSession: (...args: unknown[]) => mockGetSession(...args),
+      setSession: (...args: unknown[]) => mockSetSession(...args),
       signUp: vi.fn(),
       signOut: vi.fn(),
     },
     functions: {
-      invoke: vi.fn(),
+      invoke: (...args: unknown[]) => mockInvoke(...args),
     },
     from: (...args: unknown[]) => mockFrom(...args),
   },
@@ -28,6 +31,8 @@ describe("useAuth", () => {
     });
     mockGetSession.mockReset();
     mockFrom.mockReset();
+    mockInvoke.mockReset();
+    mockSetSession.mockReset();
   });
 
   it("setzt Rolle und Auth-Status aus vorhandener Session", async () => {
@@ -56,5 +61,39 @@ describe("useAuth", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.role).toBe(null);
+  });
+
+  it("übernimmt die Session nach erfolgreichem Passwort-Login", async () => {
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockFrom.mockReturnValue({ select: vi.fn() });
+    mockInvoke.mockResolvedValue({
+      data: {
+        data: {
+          session: {
+            access_token: "access-token",
+            refresh_token: "refresh-token",
+          },
+        },
+      },
+      error: null,
+    });
+    mockSetSession.mockResolvedValue({ error: null });
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      const response = await result.current.signIn("admin@test.de", "secret123");
+      expect(response.error).toBe(null);
+    });
+
+    expect(mockInvoke).toHaveBeenCalledWith("login-rate-limited", {
+      body: { email: "admin@test.de", password: "secret123" },
+    });
+    expect(mockSetSession).toHaveBeenCalledWith({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+    });
   });
 });
