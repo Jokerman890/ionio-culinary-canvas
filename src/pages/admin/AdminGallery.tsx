@@ -312,17 +312,41 @@ export default function AdminGallery() {
         </div>
 
         {images.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="py-16 text-center">
-              <Upload className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">
-                Noch keine Bilder vorhanden. Laden Sie Ihre ersten Fotos hoch.
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Solange keine Bilder hochgeladen sind, werden die Standard-Bilder auf der Website angezeigt.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <Card className="border-dashed">
+              <CardContent className="py-8 text-center space-y-4">
+                <Download className="w-12 h-12 mx-auto text-gold/50" />
+                <p className="text-muted-foreground">
+                  Die aktuellen Standard-Bilder der Website. Importieren Sie diese, um sie bearbeiten und austauschen zu können.
+                </p>
+                <Button
+                  className="bg-gold text-navy hover:bg-gold-light"
+                  onClick={importDefaultImages}
+                  disabled={importing}
+                >
+                  {importing ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Standardbilder importieren
+                </Button>
+              </CardContent>
+            </Card>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {defaultImages.map((image) => (
+                <Card key={image.alt} className="overflow-hidden border-border/50 opacity-70">
+                  <div className="aspect-square relative">
+                    <img src={image.src} alt={image.alt} className="w-full h-full object-cover" />
+                  </div>
+                  <CardContent className="p-3">
+                    <p className="text-sm truncate">{image.alt}</p>
+                    <p className="text-xs text-muted-foreground">Standard</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {images.map(image => (
