@@ -57,6 +57,8 @@ Das Projekt **IONIO Culinary Canvas** ist eine vollständige Webpräsenz für da
 | Kontaktbereich | Kontaktinformationen und Standort | ✅ Erreicht |
 | Admin-Dashboard | Backend zur Content-Verwaltung | ✅ Erreicht |
 | DSGVO-Konformität | Datenschutzkonforme Implementierung | ✅ Erreicht |
+| Galerie-Verwaltung | Admin kann Bilder importieren, ersetzen und editieren | ✅ Erreicht (v1.7.0) |
+| Passwort-Recovery | Kompletter Passwort-Vergessen-Flow | ✅ Erreicht (v1.7.0) |
 
 ### Erreichungsgrad: 100%
 
