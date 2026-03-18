@@ -339,6 +339,7 @@ Skalierbarkeit    ████████████████████�
 
 | Version | Datum | Highlights |
 |---------|-------|------------|
+| 1.7.0 | 18.03.2026 | Galerie-Verwaltung (Import/Ersetzen/Editieren), Passwort-Sichtbarkeit, Passwort-Vergessen-Flow |
 | 1.6.0 | 08.03.2026 | Analyse-Dashboard, Benutzerverwaltung mit E-Mails & Rollenänderung, Gerichtsnummern im Admin |
 | 1.5.0 | 07.03.2026 | Speisekarten-Suche, Kategorie-Hinweise, Vegetarisch-Flags, Hero-Fix |
 | 1.4.0 | 01.02.2026 | Sicherheits-Audit, Rate-Limiting, E2E-Scripts, Test-Abdeckung |
