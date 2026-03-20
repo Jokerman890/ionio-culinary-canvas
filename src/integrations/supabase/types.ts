@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          identifier: string
+          success: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          identifier: string
+          success?: boolean
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          identifier?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
       menu_categories: {
         Row: {
           created_at: string
@@ -261,6 +282,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_login_rate_limit: {
+        Args: {
+          p_identifier: string
+          p_max_attempts?: number
+          p_window_seconds?: number
+        }
+        Returns: Json
+      }
       get_analytics_summary: { Args: { days_back?: number }; Returns: Json }
       has_role: {
         Args: {
@@ -270,6 +299,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_staff: { Args: { _user_id: string }; Returns: boolean }
+      record_login_attempt: {
+        Args: { p_identifier: string; p_success?: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "staff"
