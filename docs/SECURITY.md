@@ -116,7 +116,7 @@ const { isAdmin } = useServerAuth();
 
 ### login-rate-limited
 
-Login-Proxy mit serverseitigem Rate-Limiting (Schutz gegen Brute-Force-Angriffe).
+Login-Proxy mit **serverseitigem** Rate-Limiting über Datenbank-Funktionen (Schutz gegen Brute-Force-Angriffe).
 
 **Endpoint:** `POST /functions/v1/login-rate-limited`
 
@@ -128,9 +128,25 @@ Login-Proxy mit serverseitigem Rate-Limiting (Schutz gegen Brute-Force-Angriffe)
 }
 ```
 
-**Rate-Limit:** 5 Versuche pro 5 Minuten (pro E-Mail + IP).
+**Rate-Limit-Architektur:**
+```
+Client → Edge Function → check_login_rate_limit(email) → DB
+                        ↓ (erlaubt)
+                        signInWithPassword()
+                        ↓
+                        record_login_attempt(email, success)
+```
 
-**Response (Erfolg):**
+**Datenbank-Funktionen:**
+
+| Funktion | Beschreibung |
+|----------|-------------|
+| `check_login_rate_limit(identifier, max_attempts, window_seconds)` | Prüft ob Limit erreicht (Default: 5 Versuche / 300s) |
+| `record_login_attempt(identifier, success)` | Speichert Versuch, bereinigt Einträge > 1 Stunde |
+
+**Rate-Limit:** 5 fehlgeschlagene Versuche pro 5 Minuten (pro E-Mail).
+
+**Response (Erfolg – 200):**
 ```json
 {
   "data": {
@@ -140,14 +156,14 @@ Login-Proxy mit serverseitigem Rate-Limiting (Schutz gegen Brute-Force-Angriffe)
 }
 ```
 
-**Response (Limit erreicht):**
+**Response (Limit erreicht – 429):**
 ```json
 {
-  "error": "rate_limited",
-  "message": "Zu viele Anmeldeversuche. Bitte später erneut versuchen.",
-  "retryAfterMs": 300000
+  "error": "Zu viele Anmeldeversuche. Bitte warten Sie X Minute(n)."
 }
 ```
+
+**Fail-Open:** Bei Fehlern in der Rate-Limit-Prüfung wird der Login-Versuch trotzdem durchgelassen, um Verfügbarkeit zu gewährleisten.
 
 ## Sichere Fehlermeldungen
 
@@ -186,3 +202,5 @@ try {
 - [x] Passwort-Mindestlänge: 8 Zeichen
 - [x] CORS-Header in Edge Functions
 - [x] JWT-Validierung in Edge Functions
+- [x] Serverseitiges Rate Limiting für Login (DB-basiert)
+- [x] Automatische Bereinigung alter Login-Versuche

@@ -4,6 +4,24 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.8.0] - 2026-03-20
+
+### 🛡️ Sicherheit
+- 🔒 **Serverseitiges Rate Limiting**: Brute-Force-Schutz über Datenbank-Funktionen statt clientseitiger Logik
+  - Neue Tabelle `login_attempts` speichert alle Anmeldeversuche mit Zeitstempel
+  - DB-Funktion `check_login_rate_limit()` prüft max. 5 fehlgeschlagene Versuche pro 5 Minuten (pro E-Mail)
+  - DB-Funktion `record_login_attempt()` zeichnet Versuche auf und bereinigt automatisch Einträge älter als 1 Stunde
+  - Edge Function `login-rate-limited` gibt HTTP 429 mit Wartezeit bei Überschreitung zurück
+
+### 🔧 Technisch
+- `login_attempts`-Tabelle mit RLS (kein Public-Access, nur SECURITY DEFINER)
+- Index `idx_login_attempts_identifier_time` für performante Rate-Limit-Abfragen
+- Edge Function nutzt `SUPABASE_SERVICE_ROLE_KEY` für DB-Zugriff auf Rate-Limit-Funktionen
+- Fail-Open-Strategie: Bei Fehler in der Rate-Limit-Prüfung wird Login dennoch erlaubt
+
+### 🐛 Bugfixes
+- 🔄 **OAuth-Weiterleitung**: Apple- und Google-Login leiten jetzt korrekt zum Admin-Dashboard weiter (statt zur Startseite)
+
 ## [1.7.0] - 2026-03-18
 
 ### ✨ Neue Features
