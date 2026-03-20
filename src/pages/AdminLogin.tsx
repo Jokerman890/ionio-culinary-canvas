@@ -128,6 +128,9 @@ export default function AdminLogin() {
     }
 
     writeRateLimitState(null);
+    // Navigation erfolgt über useEffect wenn isAuthenticated + role gesetzt sind
+    // Falls das nicht schnell genug passiert, setIsSubmitting zurücksetzen
+    setTimeout(() => setIsSubmitting(false), 3000);
   };
 
   if (loading) {
@@ -226,7 +229,7 @@ export default function AdminLogin() {
             disabled={isSubmitting}
             onClick={async () => {
               const { error } = await lovable.auth.signInWithOAuth('apple', {
-                redirect_uri: window.location.origin,
+                redirect_uri: `${window.location.origin}/admin/login`,
               });
               if (error) {
                 toast({
@@ -250,7 +253,7 @@ export default function AdminLogin() {
             disabled={isSubmitting}
             onClick={async () => {
               const { error } = await lovable.auth.signInWithOAuth('google', {
-                redirect_uri: window.location.origin,
+                redirect_uri: `${window.location.origin}/admin/login`,
               });
               if (error) {
                 toast({
