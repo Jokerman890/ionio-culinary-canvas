@@ -226,7 +226,7 @@ export default function AdminLogin() {
             disabled={isSubmitting}
             onClick={async () => {
               const { error } = await lovable.auth.signInWithOAuth('apple', {
-                redirect_uri: window.location.origin,
+                redirect_uri: `${window.location.origin}/admin/login`,
               });
               if (error) {
                 toast({
