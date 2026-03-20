@@ -128,6 +128,9 @@ export default function AdminLogin() {
     }
 
     writeRateLimitState(null);
+    // Navigation erfolgt über useEffect wenn isAuthenticated + role gesetzt sind
+    // Falls das nicht schnell genug passiert, setIsSubmitting zurücksetzen
+    setTimeout(() => setIsSubmitting(false), 3000);
   };
 
   if (loading) {
