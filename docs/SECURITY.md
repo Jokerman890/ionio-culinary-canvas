@@ -202,3 +202,5 @@ try {
 - [x] Passwort-Mindestlänge: 8 Zeichen
 - [x] CORS-Header in Edge Functions
 - [x] JWT-Validierung in Edge Functions
+- [x] Serverseitiges Rate Limiting für Login (DB-basiert)
+- [x] Automatische Bereinigung alter Login-Versuche
