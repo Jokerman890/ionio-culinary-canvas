@@ -50,6 +50,20 @@ export function usePageTracking(pagePath?: string) {
       }
     };
 
-    trackView();
+    // Defer analytics tracking until browser is idle so it doesn't
+    // compete with critical resources on initial page load (LCP/network chain).
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    let cleanup: () => void;
+    if (typeof w.requestIdleCallback === 'function') {
+      const id = w.requestIdleCallback(trackView, { timeout: 4000 });
+      cleanup = () => w.cancelIdleCallback?.(id);
+    } else {
+      const t = window.setTimeout(trackView, 2500);
+      cleanup = () => window.clearTimeout(t);
+    }
+    return cleanup;
   }, [pagePath]);
 }
