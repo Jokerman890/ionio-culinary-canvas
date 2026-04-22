@@ -53,21 +53,23 @@ Deno.serve(async (req) => {
   )
   const { data, error } = await anonClient.auth.signInWithPassword({ email, password })
 
-  if (error) {
-    // Record failed attempt
-    await serviceClient.rpc('record_login_attempt', {
-      p_identifier: identifier,
-      p_success: false,
-    }).catch((e: unknown) => console.error('Failed to record attempt:', e))
+  const recordAttempt = async (success: boolean) => {
+    try {
+      const { error: recErr } = await serviceClient.rpc('record_login_attempt', {
+        p_identifier: identifier,
+        p_success: success,
+      })
+      if (recErr) console.error('Failed to record attempt:', recErr)
+    } catch (e) {
+      console.error('Failed to record attempt (exception):', e)
+    }
+  }
 
+  if (error) {
+    await recordAttempt(false)
     return json({ error: 'Invalid credentials' }, 401, origin)
   }
 
-  // Record successful attempt (resets effective count since we only count failures)
-  await serviceClient.rpc('record_login_attempt', {
-    p_identifier: identifier,
-    p_success: true,
-  }).catch((e: unknown) => console.error('Failed to record attempt:', e))
-
+  await recordAttempt(true)
   return json({ data }, 200, origin)
 })
