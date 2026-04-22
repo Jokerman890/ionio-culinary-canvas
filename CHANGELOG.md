@@ -4,6 +4,27 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.8.1] - 2026-04-22
+
+### ⚡ Performance / SEO
+- 🚀 **LCP optimiert**: Cookie-Banner wird nicht mehr als Largest Contentful Paint erkannt
+  - `CookieBanner` nutzt `requestIdleCallback` (Timeout 3500 ms) bzw. `setTimeout` (3000 ms) als Fallback
+  - Banner erscheint erst nach dem LCP-Messfenster → keine künstliche „Element render delay" mehr
+- 🌐 **Network Dependency Tree verkürzt**: Analytics-Tracking blockiert nicht mehr die kritische Ladekette
+  - `usePageTracking` verschiebt den `page_views`-Insert per `requestIdleCallback` (Timeout 4000 ms) bzw. `setTimeout` (2500 ms)
+  - Initialer Request-Tree für LCP/CSS/JS wird nicht mehr durch anonymes Tracking verlängert
+
+### 🛡️ Sicherheit / Admin
+- 👤 **Admin-Konto manuell bereitgestellt**: `xristin777@gmail.com` wurde als Administrator angelegt
+  - Einmalige Bootstrap-Edge-Function genutzt (Service-Role) und nach Erfolg wieder entfernt
+  - Eintrag in `public.user_roles` mit Rolle `admin`
+  - Empfehlung: Passwort nach erstem Login ändern
+
+### 🔧 Technisch
+- Keine Datenbank-Migrationen erforderlich
+- Keine Änderung an Design oder UX – rein technische Deferral-Optimierungen
+- `supabase/config.toml` nach Bootstrap auf den vorherigen Stand zurückgesetzt
+
 ## [1.8.0] - 2026-03-20
 
 ### 🛡️ Sicherheit
