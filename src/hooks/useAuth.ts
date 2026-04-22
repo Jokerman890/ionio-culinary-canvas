@@ -17,8 +17,9 @@ export function useAuth() {
         setSession(session);
         setUser(session?.user ?? null);
 
-        // Defer role fetch with setTimeout
+        // Defer role fetch with setTimeout to avoid deadlocks
         if (session?.user) {
+          setLoading(true);
           setTimeout(() => {
             fetchUserRole(session.user.id);
           }, 0);
