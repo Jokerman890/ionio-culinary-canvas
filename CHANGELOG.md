@@ -4,6 +4,21 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.8.2] - 2026-04-22
+
+### 🔧 Build / Tooling
+- 🧩 **Vite-Version vereinheitlicht**: `vite` auf `5.4.19` gepinnt, um doppelte Vite-Instanzen in `node_modules` zu eliminieren
+  - Behebt TypeScript-Fehler **TS2769** in `vite.config.ts` (inkompatible `PluginOption`-Typen aus zwei Vite-Versionen)
+  - `plugins`-Array wird explizit als `PluginOption[]` typisiert (`import type { PluginOption } from "vite"`)
+  - Vorheriger `as any`-Workaround entfernt – saubere Typisierung wiederhergestellt
+- 🚀 **Kompatibilität bestätigt**: `@vitejs/plugin-react-swc` und `lovable-tagger` laufen stabil mit Vite 5.4.19
+
+### 📝 Hinweise
+- Frontend-Änderungen werden erst nach Klick auf **Publish → Update** live geschaltet
+  - Preview (`id-preview--*.lovable.app`) zeigt immer den aktuellen Build
+  - Live-URL (`ionio-prime-web.lovable.app`) bleibt auf der zuletzt veröffentlichten Version
+- Keine Datenbank-Migrationen, keine UI-/UX-Änderungen, rein technischer Wartungs-Release
+
 ## [1.8.1] - 2026-04-22
 
 ### ⚡ Performance / SEO
