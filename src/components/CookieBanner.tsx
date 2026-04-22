@@ -9,9 +9,9 @@ export function CookieBanner() {
     // Check if user has already given consent
     const hasConsent = localStorage.getItem(COOKIE_CONSENT_KEY);
     if (!hasConsent) {
-      // Small delay for smoother appearance after page load
-      const timer = setTimeout(() => setIsVisible(true), 500);
-      return () => clearTimeout(timer);
+      // Defer to next frame to avoid blocking LCP/critical render path
+      const raf = requestAnimationFrame(() => setIsVisible(true));
+      return () => cancelAnimationFrame(raf);
     }
   }, []);
   const handleAccept = () => {
