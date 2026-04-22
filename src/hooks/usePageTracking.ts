@@ -50,6 +50,19 @@ export function usePageTracking(pagePath?: string) {
       }
     };
 
-    trackView();
+    // Defer analytics tracking until browser is idle so it doesn't
+    // compete with critical resources on initial page load (LCP/network chain).
+    const schedule = (cb: () => void) => {
+      if (typeof window === 'undefined') return;
+      if ('requestIdleCallback' in window) {
+        const id = (window as Window & typeof globalThis).requestIdleCallback(cb, { timeout: 4000 });
+        return () => (window as Window & typeof globalThis).cancelIdleCallback(id);
+      }
+      const t = window.setTimeout(cb, 2500);
+      return () => window.clearTimeout(t);
+    };
+
+    const cancel = schedule(trackView);
+    return cancel;
   }, [pagePath]);
 }
