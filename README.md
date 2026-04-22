@@ -84,7 +84,48 @@ npm run dev
 npm test
 ```
 
+## 🚀 Deployment-Hinweis
+
+Frontend-Änderungen (UI, Styling, React-Code) werden **nicht automatisch** live geschaltet. Nach dem Speichern müssen sie über **Publish → Update** (oben rechts im Editor) veröffentlicht werden. Backend-Änderungen (Edge Functions, Migrationen) werden hingegen sofort deployed.
+
+- **Preview-URL** (immer aktuell): `https://id-preview--<project-id>.lovable.app`
+- **Live-URL** (zuletzt veröffentlicht): `https://ionio-prime-web.lovable.app`
+
 ## 📝 Changelog
+
+### Version 1.8.2 (2026-04-22)
+**🔧 Build/Tooling**
+- 🧩 Vite auf 5.4.19 gepinnt – doppelte Vite-Instanzen entfernt
+- ✅ TypeScript-Fehler **TS2769** in `vite.config.ts` behoben
+- 🧼 `as any`-Workaround durch sauberes `PluginOption[]` ersetzt
+
+### Version 1.8.1 (2026-04-22)
+**⚡ Performance / SEO**
+- 🚀 Cookie-Banner & Analytics-Tracking via `requestIdleCallback` deferred (LCP-Optimierung)
+- 👤 Admin-Konto `xristin777@gmail.com` bereitgestellt
+
+### Version 1.8.0 (2026-03-20)
+**🛡️ Sicherheit**
+- 🔒 Serverseitiges Login-Rate-Limiting (5 Versuche / 5 Min) via Edge Function `login-rate-limited`
+- 🔄 OAuth-Weiterleitung (Google/Apple) korrigiert
+
+### Version 1.7.0 (2026-03-18)
+**✨ Features**
+- 🖼️ Galerie-Verwaltung erweitert (Standardbilder importieren, Ersetzen)
+- 👁️ Passwort-Sichtbarkeit im Login
+- 🔑 Passwort-vergessen-Flow inkl. Reset-Seite
+
+### Version 1.6.0 (2026-03-08)
+**📊 Analyse-Dashboard**
+- 📈 Besucherstatistiken, Geräte/Browser, Top-Seiten
+- 👥 Benutzerverwaltung mit E-Mail-Anzeige & Rollenwechsel via Edge Function `manage-users`
+- 🔢 Gerichtsnummern im Admin
+
+### Version 1.5.0 (2026-03-07)
+**🔍 Speisekarte**
+- 🔍 Such-Funktion (Name + Beschreibung)
+- 🏷️ Aufpreis-Hinweise (gold)
+- 🥬 Vegetarisch-Markierungen + fehlende Gerichtnummern
 
 ### Version 1.4.0 (2026-02-01)
 **🛡️ Audit & Tests**
