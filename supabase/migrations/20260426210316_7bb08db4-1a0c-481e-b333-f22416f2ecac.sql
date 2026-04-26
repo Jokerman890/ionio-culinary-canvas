@@ -1,0 +1,1 @@
+UPDATE public.menu_items SET dish_number='TEST-5' WHERE name='Tzatziki';
