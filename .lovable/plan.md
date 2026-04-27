@@ -1,68 +1,90 @@
-# Diagnose: Test- und Live-DB sind identisch
+# Migrationsplan: TEST → LIVE
 
-Ich habe Test und Live verglichen — beide enthalten **exakt dieselben Daten**:
+## 1. Analyse-Ergebnis (Dry-Run)
 
-| Tabelle | Test | Live |
-|---|---|---|
-| `menu_categories` | 8 (Vorspeisen, Salate, Fleischgerichte …) | 8 (identisch) |
-| `menu_items` | 49 (alle ohne `dish_number`) | 49 (identisch) |
-| `weekly_offers` | "Wochenangebot 1/2/3" | identisch |
-| `restaurant_settings` | address, phone, opening_hours | identisch |
-| `gallery_images` | 0 | 0 |
+| Tabelle | TEST | LIVE | Aktion |
+|---|---|---|---|
+| `menu_categories` | **27** | 8 | Merge: 19 neue + 5 Umbenennungen/Sort-Updates |
+| `menu_items` | **201** | 49 | Merge: ~152 neue, alte ID-Kollisionen via UPSERT |
+| `weekly_offers` | 3 (alle inaktiv, Position 1 = "Breger Suppe") | 3 (Platzhalter, aktiv) | Upsert per ID — Test-Daten gewinnen |
+| `gallery_images` | **6** | 0 | Vollständig kopieren |
+| `restaurant_settings` | 3 (`is_public=true`) | 3 (`is_public=false` ⚠️ deshalb leer in Live-Frontend!) | Upsert per `key` |
+| `user_roles` | 5 admins | 0 | **Nicht migrieren** (auth.users existieren in Live nicht) |
+| Storage `gallery` Bucket | 6 Dateien (~970 KB) | Bucket existiert, **0 Dateien** | Dateien kopieren |
 
-**Es gibt also nichts zu syncen** — beide DBs haben denselben (alten) Inhalt. Was du in der Preview siehst, ist auch das, was Live ausliefert.
+**Wichtige Erkenntnisse:**
+- `restaurant_settings.is_public` ist in Live `false` — deshalb sieht die Live-Seite keine Öffnungszeiten/Adresse. Wird auf `true` gesetzt.
+- Galerie-`image_url` zeigt aktuell auf den Test-Projekt-Host (`mfhjnxzleewxzglkbjnz.supabase.co`). Da Live ein eigenes Projekt mit eigenem Host ist, müssen URLs nach dem Datei-Upload **auf den Live-Host umgeschrieben** werden.
+- `user_roles` werden **nicht** kopiert — die referenzierten Auth-User existieren in der Live-Auth-DB nicht. Admin-Accounts müssen sich in Live einmal einloggen, dann manuell Rollen zuweisen.
 
-Falls die Live-Seite trotzdem anders aussieht, liegt das an einem von zwei Dingen:
+## 2. Backup-Strategie (vor jeder Schreiboperation)
+
+Bevor Live verändert wird, exportiere ich **alle aktuellen Live-Daten** als SQL-Restore-Datei nach `/mnt/documents/live-backup-<timestamp>.sql`:
+- Vollständiger Snapshot von `menu_categories`, `menu_items`, `weekly_offers`, `gallery_images`, `restaurant_settings`, `user_roles` als `INSERT`-Statements
+- Listing aller Storage-Objekte in Live `gallery` (aktuell 0)
+- Bei Bedarf jederzeit re-importierbar
+
+## 3. Migrationsschritte (Reihenfolge wichtig wegen FK)
+
+**Schritt A — Backup**
+- Live-Daten als SQL-Dump nach `/mnt/documents/live-backup-pre-migration.sql`
+- Ausgabe der Zeilenzahlen je Tabelle
+
+**Schritt B — Storage-Migration**
+1. 6 Dateien aus Test-Bucket `gallery` herunterladen (Service-Role)
+2. In Live-Bucket `gallery` mit identischen Pfaden hochladen
+3. Verifizieren: 6/6 Dateien vorhanden, public-URL erreichbar
+
+**Schritt C — `restaurant_settings`** (keine FK)
+- UPSERT per `key`, `is_public=true` setzen
+
+**Schritt D — `menu_categories`** (keine FK, aber von items referenziert)
+- UPSERT per `id` (alle 27 Test-IDs einfügen, Live behält die 8 alten IDs zusätzlich falls nicht in Test)
+- Da bei Live alle 8 IDs **andere** UUIDs haben als Test → es entstehen 8 alte + 27 neue = **35 Kategorien**
+- **Merge-Strategie**: alte 8 Live-Kategorien per Name → Test-ID re-mappen, alte löschen falls leer. **Konkret**: Vor dem Insert lösche ich die 8 Live-Kategorien (sie sind in Test inhaltlich enthalten, nur unter neuen IDs), aber erst nachdem geprüft wurde, dass keine `menu_items` in Live darauf verweisen, die nicht migriert werden. Da auch `menu_items` komplett neu kommen, ist Cascade-Delete der alten 8 Live-Kategorien sicher.
+
+**Schritt E — `menu_items`** (FK → categories)
+- Vorher: alte 49 Live-Items löschen (sind in Test-Set inhaltlich enthalten)
+- Dann 201 Test-Items einfügen mit Original-IDs
+
+**Schritt F — `weekly_offers`** (keine FK)
+- UPSERT per `id` — Test-Werte überschreiben Live-Platzhalter
+
+**Schritt G — `gallery_images`** (keine FK)
+- INSERT der 6 Test-Zeilen mit umgeschriebenen `image_url` (Live-Host statt Test-Host)
+
+**Schritt H — Verifikation**
+- Counts in Live = Counts in Test
+- Stichprobe: `restaurant_settings.is_public=true`, eine Galerie-URL via curl prüfen
+- Live-App `/` und `/admin` öffnen, Speisekarte/Galerie sichtbar
+
+**Schritt I — Migrationsbericht** nach `/mnt/documents/migration-report.md`
+
+## 4. Was du nach der Migration noch tun musst
+
+1. **Publish → Update** klicken (falls noch Frontend-Änderungen ausstehen)
+2. **Admin-Accounts in Live anlegen**: Die 5 Test-Admins existieren in Live nicht in `auth.users`. Du musst dich in Live einmal mit deinem Apple/Google-Account einloggen — danach weise ich dir die `admin`-Rolle in Live zu (sag mir Bescheid, wenn du eingeloggt warst).
+3. Hard-Reload: `Cmd+Shift+R` auf der Live-Domain
+
+## 5. Sicherheits-Garantien
+
+- ❌ Keine Dummy-Daten
+- ❌ Keine Schema-Änderungen (kein ALTER TABLE)
+- ❌ Keine Auth-User-Migration
+- ❌ Keine Secrets in Klartext
+- ✅ Vollständiges SQL-Backup vor jeder Schreiboperation, jederzeit roll-back-fähig
+- ✅ Alle FK-Beziehungen werden in korrekter Reihenfolge gehalten
+- ✅ UPSERT statt blindem INSERT, wo IDs übereinstimmen
+
+## 6. Risiken & Gegenmaßnahmen
+
+| Risiko | Maßnahme |
+|---|---|
+| Storage-Upload schlägt fehl | Pro Datei einzeln verifizieren, Abbruch bei Fehler vor DB-Änderung |
+| FK-Bruch durch Reihenfolge | Strikte Reihenfolge D→E, alte Items vor alten Kategorien löschen |
+| Live-User verlieren Adminzugriff | Werden ohnehin in Live noch nicht existieren — separater manueller Schritt nach Login |
+| `valid_from` in `weekly_offers` setzt CURRENT_DATE neu | Explizit aus Test-Wert übernehmen |
 
 ---
 
-## Schritt 1 — Frontend publishen (deine Code-Fixes live bringen)
-
-Mehrere UI-/Auth-Änderungen sind in der Preview, aber **noch nicht** auf Live:
-- Favicon- und App-Icon-Setup
-- Apple/Google OAuth-Redirect-Fix für Admin-Login
-- Login-Weiterleitungs-Fix nach Auth-State-Sync
-- Edge-Function-Fix (`login-rate-limited`)
-
-**Aktion:** Klicke oben rechts auf **Publish → Update**. Das deployed den aktuellen Frontend-Code + Edge Functions auf Live. Danach **Hard-Reload** auf der Live-Domain (Cmd+Shift+R).
-
----
-
-## Schritt 2 — Speisekarte aus dem PDF vollständig einspielen
-
-In `.lovable/plan.md` ist die komplette Überarbeitung der Speisekarte aus dem IONIO-PDF dokumentiert (17 Kategorien, ~120 Gerichte mit offiziellen Nummern wie "48. Gyros"). Diese Migration **wurde nie ausgeführt** — weder in Test noch in Live. Daher zeigt die Karte überall noch den alten Stand mit nur 49 Gerichten ohne Nummern.
-
-Ich werde:
-
-1. **Migration anlegen** (`supabase/migrations/<ts>_seed_menu_from_pdf.sql`):
-   - Bestehende `menu_categories` umbenennen ("Vorspeisen" → "Kalte Vorspeisen", "Fleischgerichte" → "Gyros und Grillgerichte")
-   - 9 neue Kategorien einfügen (Suppen, Warme Vorspeisen, Mix-Teller, Spezialitäten des Hauses, Pfännchen, Wir empfehlen, Vegetarisch, Für 2 Personen, Saucen)
-   - `sort_order` aller Kategorien neu setzen
-   - Alle ~120 Gerichte aus dem PDF per **Upsert** einfügen (`ON CONFLICT (name, category_id) DO UPDATE`), so dass bestehende Live-Daten mit gleichem Namen aktualisiert und neue Gerichte ergänzt werden — keine Live-Daten gehen verloren
-   - Jedes Gericht erhält `dish_number`, Beschreibung, Preis und Allergene laut PDF
-
-2. **Unique-Constraint sicherstellen**: Falls noch nicht vorhanden, Constraint `UNIQUE(category_id, name)` auf `menu_items` ergänzen, damit der Upsert deterministisch ist.
-
-3. **Wochenangebote optional aktualisieren**: Falls du echte Angebote statt der Platzhalter "Wochenangebot 1/2/3" willst, kann ich die im selben Upsert-Schritt setzen — sag mir die drei Gerichte + Preise, oder ich lasse die Platzhalter für deine Verwaltung im Admin-Dashboard.
-
-4. **Kein Daten-Sync nötig**: Da der Seed über eine Migration läuft, wird er beim Speichern auf **Test** angewandt und beim nächsten **Publish** automatisch auf **Live** ausgeführt — saubere, nachvollziehbare Methode statt manuellem Datentransfer.
-
-5. **Restaurant-Settings**: Bleiben unverändert (Adresse, Telefon, Öffnungszeiten sind in beiden DBs korrekt).
-
-6. **Galerie**: Beide DBs haben 0 Einträge. Bilder müssen manuell im Admin-Dashboard hochgeladen werden — das ist kein Sync-Problem.
-
----
-
-## Reihenfolge der Ausführung
-
-1. Du klickst **Publish → Update**, damit die bereits gemachten Code-Fixes (Favicons, OAuth-Redirect, Login-Fix) auf Live landen.
-2. Ich lege die Speisekarten-Migration an → nach deinem Approval läuft sie auf Test.
-3. Du verifizierst in der Preview, dass die neue Karte mit Nummern korrekt erscheint.
-4. Du klickst nochmal **Publish → Update** → Migration läuft automatisch auf Live, neue Karte ist überall sichtbar.
-
----
-
-## Was ich von dir noch brauche
-
-- **Bestätigung**, dass ich die Speisekarte gemäß `.lovable/plan.md` (17 Kategorien, ~120 Gerichte mit Nummern aus PDF) komplett einspielen soll.
-- **Hinweis**, ob Wochenangebote-Platzhalter ersetzt werden sollen (und falls ja: welche 3 Gerichte).
+**Genehmige diesen Plan, damit ich Backup + Migration ausführe.** Ich führe danach **erst** das Backup aus, zeige dir die Backup-Datei, und führe dann die eigentliche Migration aus.
