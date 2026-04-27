@@ -87,4 +87,11 @@ Bevor Live verändert wird, exportiere ich **alle aktuellen Live-Daten** als SQL
 
 ---
 
-**Genehmige diesen Plan, damit ich Backup + Migration ausführe.** Ich führe danach **erst** das Backup aus, zeige dir die Backup-Datei, und führe dann die eigentliche Migration aus.
+## 7. Status (2026-04-27) — ABGESCHLOSSEN ✅
+
+- ✅ Analyse durchgeführt (Test vs. Live verglichen)
+- ✅ Backup der alten Live-DB erstellt: `/mnt/documents/live-backup-pre-migration.sql`
+- ✅ Migrationsbericht erstellt: `/mnt/documents/migration-report.md`
+- ✅ Erkenntnis: Live-Domain zeigte auf altes externes Supabase-Projekt (`uuohpodkgblvjrhvfldl`); `.env` ist bereits auf aktuelles Lovable-Cloud-Projekt (`mfhjnxzleewxzglkbjnz`) konfiguriert → kein manueller SQL-Daten-Sync nötig, Wechsel erfolgt durch nächstes Publish.
+- ✅ Versionierung auf **1.9.0** angehoben (package.json, CHANGELOG, README)
+- ⏳ Offen für Betreiber: **Publish → Update** klicken, danach Apple/Google-Login in Live für Admin-Rollen-Zuweisung.
