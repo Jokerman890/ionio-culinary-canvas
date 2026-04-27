@@ -29,7 +29,7 @@ Eine moderne Restaurant-Website mit integriertem Admin-Dashboard für das griech
 
 - **Frontend**: React 18, TypeScript, Vite
 - **Styling**: Tailwind CSS, shadcn/ui
-- **Backend**: Supabase (Lovable Cloud)
+- **Backend**: Supabase (`mfhjnxzleewxzglkbjnz`)
   - PostgreSQL Datenbank
   - Row-Level Security
   - Edge Functions (Deno)
@@ -86,21 +86,22 @@ npm test
 
 ## 🚀 Deployment-Hinweis
 
-Frontend-Änderungen (UI, Styling, React-Code) werden **nicht automatisch** live geschaltet. Nach dem Speichern müssen sie über **Publish → Update** (oben rechts im Editor) veröffentlicht werden. Backend-Änderungen (Edge Functions, Migrationen) werden hingegen sofort deployed.
+Frontend-Änderungen werden über GitHub Actions gebaut und auf den Hostinger VPS nach `/opt/ionio-culinary-canvas/dist` deployed. Die Production-Domain ist `https://ionio-ganderkesee.de/`. Backend-Änderungen an Supabase Edge Functions und Auth-Konfiguration müssen im Supabase-Projekt `mfhjnxzleewxzglkbjnz` deployed bzw. gesetzt werden.
 
-- **Preview-URL** (immer aktuell): `https://id-preview--<project-id>.lovable.app`
-- **Live-URL** (zuletzt veröffentlicht): `https://ionio-prime-web.lovable.app`
+- **Production-URL**: `https://ionio-ganderkesee.de/`
+- **VPS-Build-Pfad**: `/opt/ionio-culinary-canvas/dist`
+- **Preview-URL** (optional): `https://ionio-culinary-canvas.vercel.app`
 
 ## 📝 Changelog
 
 ### Version 1.9.0 (2026-04-27)
 **🚀 Environment-Migration (Test → Live)**
-- 🔁 Live-Domain auf aktuelles Lovable-Cloud-Projekt umgestellt (vorher altes externes Supabase-Projekt mit veralteten Daten)
+- 🔁 Production-Domain `https://ionio-ganderkesee.de/` nutzt das Supabase-Projekt `mfhjnxzleewxzglkbjnz`
 - 📦 Vollständige Inhalte nun live: 27 Kategorien, 201 Gerichte, 6 Galerie-Bilder
 - 🛟 Backup der alten Live-DB unter `/mnt/documents/live-backup-pre-migration.sql`
 - 📄 Migrationsbericht unter `/mnt/documents/migration-report.md`
 - 🔐 `user_roles` nicht migriert — Admin-Rollen nach erstem Login in Live neu zuweisen
-- ✅ Aktion: **Publish → Update** klicken + Hard-Reload auf Live-Domain
+- ✅ Aktion: VPS-Deployment ausführen + Hard-Reload auf `https://ionio-ganderkesee.de/`
 
 ### Version 1.8.2 (2026-04-22)
 **🔧 Build/Tooling**

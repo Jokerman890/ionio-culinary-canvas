@@ -71,7 +71,7 @@ Das Projekt **IONIO Culinary Canvas** ist eine vollständige Webpräsenz für da
 - **Aktuelle Version:** 1.5.0
 - **Entwicklungsphase:** Produktion
 - **Release-Status:** Stabil
-- **Veröffentlicht:** https://ionio-prime-web.lovable.app
+- **Veröffentlicht:** https://ionio-ganderkesee.de/
 
 ### Fertiggestellte Komponenten
 
