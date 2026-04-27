@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: deploy-vps-production
   cancel-in-progress: true
@@ -14,10 +17,13 @@ jobs:
   build-and-deploy:
     name: Build and deploy production
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     env:
+      DEPLOY_PATH: /opt/ionio-culinary-canvas/dist
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
 
     steps:
@@ -48,27 +54,27 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Prepare release on VPS
+      - name: Prepare deploy directory on VPS
         run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=yes \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "mkdir -p '${{ secrets.VPS_RELEASE_DIR }}' '${{ secrets.VPS_WEB_ROOT }}'"
+            "mkdir -p '${DEPLOY_PATH}'"
 
-      - name: Upload build to VPS release directory
+      - name: Upload build to VPS deploy path
         run: |
           rsync -az --delete \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
             dist/ \
-            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_RELEASE_DIR }}/"
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${DEPLOY_PATH}/"
 
-      - name: Activate release and reload Nginx
+      - name: Verify deployed files and reload Nginx
         run: |
           ssh -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=yes \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "set -e
-             rsync -a --delete '${{ secrets.VPS_RELEASE_DIR }}/' '${{ secrets.VPS_WEB_ROOT }}/'
+             test -f '${DEPLOY_PATH}/index.html'
              if command -v sudo >/dev/null 2>&1; then
                sudo nginx -t
                sudo systemctl reload nginx
@@ -77,8 +83,12 @@ jobs:
                systemctl reload nginx
              fi"
 
+      - name: Check live website
+        run: |
+          curl -fL --retry 5 --retry-delay 3 https://ionio-ganderkesee.de
+
       - name: Deployment summary
         run: |
           echo "Production deployment finished."
           echo "Target host: ${{ secrets.VPS_HOST }}"
-          echo "Web root: ${{ secrets.VPS_WEB_ROOT }}"
+          echo "Deploy path: ${DEPLOY_PATH}"
