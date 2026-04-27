@@ -85,6 +85,40 @@ Do not use `Access-Control-Allow-Origin: *` for authenticated browser calls.
 
 Edge Function secrets must stay in Supabase project secrets or GitHub/VPS secrets. Never expose `SUPABASE_SERVICE_ROLE_KEY` in the frontend build.
 
+## Redeploy Edge Functions After CORS Changes
+
+Changes in `supabase/functions/_shared/cors.ts` only affect live traffic after the Edge Functions are deployed again to the production Supabase project.
+
+Deploy the browser-invoked functions to project `mfhjnxzleewxzglkbjnz`:
+
+```bash
+npx supabase functions deploy login-rate-limited --project-ref mfhjnxzleewxzglkbjnz
+npx supabase functions deploy verify-admin --project-ref mfhjnxzleewxzglkbjnz
+npx supabase functions deploy manage-users --project-ref mfhjnxzleewxzglkbjnz
+```
+
+Before deploying, make sure the Supabase CLI is authenticated via `npx supabase login` or a non-logged `SUPABASE_ACCESS_TOKEN`. Confirm the production function secrets exist without printing their values:
+
+```text
+SUPABASE_URL
+SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+```
+
+Verify CORS after deployment:
+
+```bash
+curl -i -X OPTIONS \
+  https://mfhjnxzleewxzglkbjnz.supabase.co/functions/v1/login-rate-limited \
+  -H "Origin: https://ionio-ganderkesee.de"
+
+curl -i -X OPTIONS \
+  https://mfhjnxzleewxzglkbjnz.supabase.co/functions/v1/login-rate-limited \
+  -H "Origin: https://www.ionio-ganderkesee.de"
+```
+
+Expected result: each response returns `HTTP 200` and `Access-Control-Allow-Origin` exactly matching the request `Origin`.
+
 ## Hostinger Nginx SPA Fallback
 
 The VPS serves a static Vite build from `/opt/ionio-culinary-canvas/dist`. Because the app uses React Router `BrowserRouter`, Nginx must serve `index.html` for client-side routes:
