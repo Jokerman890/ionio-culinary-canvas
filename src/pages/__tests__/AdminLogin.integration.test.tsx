@@ -8,6 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 // Mock Supabase
 const mockInvoke = vi.fn()
 const mockSignIn = vi.fn()
+const mockSignInWithOAuth = vi.fn()
 
 vi.mock('@/integrations/supabase/client', () => ({
     supabase: {
@@ -18,6 +19,7 @@ vi.mock('@/integrations/supabase/client', () => ({
             onAuthStateChange: () => ({ data: { subscription: { unsubscribe: vi.fn() } } }),
             getSession: () => Promise.resolve({ data: { session: null } }),
             signInWithPassword: (...args) => mockSignIn(...args),
+            signInWithOAuth: (...args) => mockSignInWithOAuth(...args),
             signOut: vi.fn(),
         },
         from: () => ({
@@ -96,6 +98,29 @@ describe('AdminLogin Integration', () => {
         // Expect toast or error message (toast is mocked, so we verify logic flow implicitly or mocked call)
         await waitFor(() => {
             expect(mockInvoke).toHaveBeenCalled()
+        })
+    })
+
+    it('starts Google OAuth through Supabase with admin login redirect', async () => {
+        mockSignInWithOAuth.mockResolvedValueOnce({ data: {}, error: null })
+
+        render(
+            <BrowserRouter>
+                <AuthProvider>
+                    <AdminLogin />
+                </AuthProvider>
+            </BrowserRouter>
+        )
+
+        fireEvent.click(await screen.findByRole('button', { name: /Mit Google anmelden/i }))
+
+        await waitFor(() => {
+            expect(mockSignInWithOAuth).toHaveBeenCalledWith({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/admin/login`,
+                },
+            })
         })
     })
 })
