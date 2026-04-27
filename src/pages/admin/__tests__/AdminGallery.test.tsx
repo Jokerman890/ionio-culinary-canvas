@@ -29,7 +29,7 @@ vi.mock('@/components/admin/AdminLayout', () => ({
 }))
 
 describe('AdminGallery', () => {
-    it('rendert leeren Zustand wenn keine Bilder vorhanden sind', async () => {
+    it('rendert den Standardbild-Import-State wenn keine Galerie-Bilder vorhanden sind', async () => {
         mockFrom.mockReturnValue({
             select: () => ({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }),
         })
@@ -37,6 +37,17 @@ describe('AdminGallery', () => {
         render(<AdminGallery />)
 
         await waitFor(() => expect(screen.getByText('Galerie')).toBeInTheDocument())
-        expect(screen.getByText('Noch keine Bilder vorhanden. Laden Sie Ihre ersten Fotos hoch.')).toBeInTheDocument()
+        expect(screen.getByText('Verwalten Sie die Bilder, die auf der Website angezeigt werden.')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Aktualisieren' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Bild hinzufügen' })).toBeInTheDocument()
+        expect(screen.getByText('Die aktuellen Standard-Bilder der Website. Importieren Sie diese, um sie bearbeiten und austauschen zu können.')).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Standardbilder importieren' })).toBeInTheDocument()
+        expect(screen.getByText('Restaurant Innenraum')).toBeInTheDocument()
+        expect(screen.getByText('Griechischer Salat')).toBeInTheDocument()
+        expect(screen.getByText('Grill')).toBeInTheDocument()
+        expect(screen.getByText('Lammkoteletts')).toBeInTheDocument()
+        expect(screen.getByText('Baklava')).toBeInTheDocument()
+        expect(screen.getByText('Gegrillter Fisch')).toBeInTheDocument()
+        expect(screen.getByText('Die sichtbaren Bilder werden in der Galerie auf der Website angezeigt. Solange keine Bilder hochgeladen sind, werden Standard-Bilder verwendet.')).toBeInTheDocument()
     })
 })
