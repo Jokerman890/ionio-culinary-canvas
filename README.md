@@ -93,6 +93,15 @@ Frontend-Änderungen (UI, Styling, React-Code) werden **nicht automatisch** live
 
 ## 📝 Changelog
 
+### Version 1.9.0 (2026-04-27)
+**🚀 Environment-Migration (Test → Live)**
+- 🔁 Live-Domain auf aktuelles Lovable-Cloud-Projekt umgestellt (vorher altes externes Supabase-Projekt mit veralteten Daten)
+- 📦 Vollständige Inhalte nun live: 27 Kategorien, 201 Gerichte, 6 Galerie-Bilder
+- 🛟 Backup der alten Live-DB unter `/mnt/documents/live-backup-pre-migration.sql`
+- 📄 Migrationsbericht unter `/mnt/documents/migration-report.md`
+- 🔐 `user_roles` nicht migriert — Admin-Rollen nach erstem Login in Live neu zuweisen
+- ✅ Aktion: **Publish → Update** klicken + Hard-Reload auf Live-Domain
+
 ### Version 1.8.2 (2026-04-22)
 **🔧 Build/Tooling**
 - 🧩 Vite auf 5.4.19 gepinnt – doppelte Vite-Instanzen entfernt

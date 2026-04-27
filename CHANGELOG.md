@@ -4,6 +4,27 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.9.0] - 2026-04-27
+
+### 🚀 Environment-Migration (Test → Live)
+- 🔁 **Live-Domain auf Lovable Cloud umgestellt**: Die Live-Site (`ionio-prime-web.lovable.app` / `ionio-ganderkesee.de`) zeigte zuvor auf ein altes externes Supabase-Projekt (`uuohpodkgblvjrhvfldl`) mit veralteten Daten (8 Kategorien / 49 Gerichte). Nach Publish nutzt Live nun das aktuelle Lovable-Cloud-Projekt (`mfhjnxzleewxzglkbjnz`) mit den vollständigen Inhalten (27 Kategorien, 201 Gerichte, 6 Galerie-Bilder).
+- 🛟 **Backup erstellt** vor der Migration: `/mnt/documents/live-backup-pre-migration.sql` (Snapshot der alten Live-DB als Rollback-Quelle).
+- 📄 **Migrationsbericht** dokumentiert unter `/mnt/documents/migration-report.md` (Vergleich Test vs. Live, Schritte, Ausschlüsse).
+- ⚙️ **Strategie**: Da `.env` bereits auf das Cloud-Projekt verweist, war kein manueller SQL-Daten-Sync nötig — der Wechsel erfolgt durch das nächste Publish-Deployment.
+- 🔐 **`user_roles` bewusst nicht migriert**: Auth-User existieren nur im jeweiligen Projekt. Admin-Rollen müssen nach erstem Login in Live neu zugewiesen werden.
+- 📌 **Wochenangebote**: Datensätze sind vorhanden, jedoch standardmäßig `is_active = false`. Aktivierung über Admin-Dashboard.
+
+### 📝 Dokumentation
+- 📚 Migrationsplan in `.lovable/plan.md` finalisiert (Analyse, Backup-Strategie, Risiken, Sicherheits-Garantien).
+- 🧾 README & CHANGELOG mit Live-Datenbank-Hinweisen und neuer Version aktualisiert.
+- 🆙 `package.json` Version auf **1.9.0** angehoben.
+
+### ✅ Aktion für Betreiber
+1. **Publish → Update** klicken, um den aktuellen Frontend-Build live zu schalten.
+2. Hard-Reload auf der Live-Domain (`Cmd+Shift+R` / `Ctrl+Shift+R`).
+3. Mit Apple/Google in Live einloggen → Bescheid geben für Admin-Rollen-Zuweisung.
+4. Wochenangebote bei Bedarf im Admin aktivieren.
+
 ## [1.8.2] - 2026-04-22
 
 ### 🔧 Build / Tooling
