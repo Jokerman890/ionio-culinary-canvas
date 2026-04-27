@@ -1,5 +1,7 @@
 export const allowedOrigins = [
   'https://ionio-ganderkesee.de',
+  'https://www.ionio-ganderkesee.de',
+  'https://ionio-culinary-canvas.vercel.app',
   'https://ionio-prime-web.lovable.app',
   'http://localhost:5173',
 ]
@@ -7,8 +9,6 @@ export const allowedOrigins = [
 const isAllowedOrigin = (origin: string | null): boolean => {
   if (!origin) return false
   if (allowedOrigins.includes(origin)) return true
-  // Allow all Lovable preview/project origins
-  if (origin.endsWith('.lovableproject.com') || origin.endsWith('.lovable.app')) return true
   return false
 }
 

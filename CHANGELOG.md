@@ -7,10 +7,10 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 ## [1.9.0] - 2026-04-27
 
 ### 🚀 Environment-Migration (Test → Live)
-- 🔁 **Live-Domain auf Lovable Cloud umgestellt**: Die Live-Site (`ionio-prime-web.lovable.app` / `ionio-ganderkesee.de`) zeigte zuvor auf ein altes externes Supabase-Projekt (`uuohpodkgblvjrhvfldl`) mit veralteten Daten (8 Kategorien / 49 Gerichte). Nach Publish nutzt Live nun das aktuelle Lovable-Cloud-Projekt (`mfhjnxzleewxzglkbjnz`) mit den vollständigen Inhalten (27 Kategorien, 201 Gerichte, 6 Galerie-Bilder).
+- 🔁 **Production-Domain auf Hostinger/Supabase ausgerichtet**: Die Live-Site `https://ionio-ganderkesee.de/` nutzt das Supabase-Projekt `mfhjnxzleewxzglkbjnz` mit den vollständigen Inhalten (27 Kategorien, 201 Gerichte, 6 Galerie-Bilder).
 - 🛟 **Backup erstellt** vor der Migration: `/mnt/documents/live-backup-pre-migration.sql` (Snapshot der alten Live-DB als Rollback-Quelle).
 - 📄 **Migrationsbericht** dokumentiert unter `/mnt/documents/migration-report.md` (Vergleich Test vs. Live, Schritte, Ausschlüsse).
-- ⚙️ **Strategie**: Da `.env` bereits auf das Cloud-Projekt verweist, war kein manueller SQL-Daten-Sync nötig — der Wechsel erfolgt durch das nächste Publish-Deployment.
+- ⚙️ **Strategie**: Das Frontend wird für die Production-Domain gebaut und per VPS-Deployment nach `/opt/ionio-culinary-canvas/dist` ausgeliefert.
 - 🔐 **`user_roles` bewusst nicht migriert**: Auth-User existieren nur im jeweiligen Projekt. Admin-Rollen müssen nach erstem Login in Live neu zugewiesen werden.
 - 📌 **Wochenangebote**: Datensätze sind vorhanden, jedoch standardmäßig `is_active = false`. Aktivierung über Admin-Dashboard.
 
@@ -20,8 +20,8 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - 🆙 `package.json` Version auf **1.9.0** angehoben.
 
 ### ✅ Aktion für Betreiber
-1. **Publish → Update** klicken, um den aktuellen Frontend-Build live zu schalten.
-2. Hard-Reload auf der Live-Domain (`Cmd+Shift+R` / `Ctrl+Shift+R`).
+1. VPS-Deployment ausführen, um den aktuellen Frontend-Build live zu schalten.
+2. Hard-Reload auf `https://ionio-ganderkesee.de/` (`Cmd+Shift+R` / `Ctrl+Shift+R`).
 3. Mit Apple/Google in Live einloggen → Bescheid geben für Admin-Rollen-Zuweisung.
 4. Wochenangebote bei Bedarf im Admin aktivieren.
 
@@ -35,9 +35,9 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 - 🚀 **Kompatibilität bestätigt**: `@vitejs/plugin-react-swc` und `lovable-tagger` laufen stabil mit Vite 5.4.19
 
 ### 📝 Hinweise
-- Frontend-Änderungen werden erst nach Klick auf **Publish → Update** live geschaltet
-  - Preview (`id-preview--*.lovable.app`) zeigt immer den aktuellen Build
-  - Live-URL (`ionio-prime-web.lovable.app`) bleibt auf der zuletzt veröffentlichten Version
+- Frontend-Änderungen werden per GitHub Actions auf den Hostinger VPS deployed
+  - Preview kann über Vercel laufen
+  - Production-URL ist `https://ionio-ganderkesee.de/`
 - Keine Datenbank-Migrationen, keine UI-/UX-Änderungen, rein technischer Wartungs-Release
 
 ## [1.8.1] - 2026-04-22
@@ -201,7 +201,7 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ### ⚡ Performance
 - **Preconnect-Hints hinzugefügt**: 
-  - Supabase API (`uuohpodkgblvjrhvfldl.supabase.co`)
+  - Supabase API (`mfhjnxzleewxzglkbjnz.supabase.co`)
   - Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`)
 - **Hero-Bild optimiert**: 
   - Umstellung von CSS-Background auf `<img>` Tag

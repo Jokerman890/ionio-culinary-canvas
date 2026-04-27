@@ -1,0 +1,135 @@
+# Hostinger Supabase Auth Configuration
+
+This project is deployed as a Vite SPA on the Hostinger VPS and uses Supabase Auth directly. Production OAuth must not use the Lovable Cloud OAuth broker (`/~oauth/initiate`).
+
+## Production Project
+
+- Supabase project ref: `mfhjnxzleewxzglkbjnz`
+- Supabase URL: `https://mfhjnxzleewxzglkbjnz.supabase.co`
+- Production site URL: `https://ionio-ganderkesee.de`
+- Production build path on VPS: `/opt/ionio-culinary-canvas/dist`
+
+## Supabase Auth URL Configuration
+
+Set the Supabase Auth Site URL to:
+
+```text
+https://ionio-ganderkesee.de
+```
+
+Add these Allowed Redirect URLs in Supabase Authentication -> URL Configuration:
+
+```text
+https://ionio-ganderkesee.de/**
+https://www.ionio-ganderkesee.de/**
+https://ionio-ganderkesee.de/admin/login
+https://ionio-ganderkesee.de/admin
+https://ionio-ganderkesee.de/reset-password
+http://localhost:5173/**
+```
+
+Optional preview URLs, if those environments are still used:
+
+```text
+https://ionio-culinary-canvas.vercel.app/**
+https://ionio-prime-web.lovable.app/**
+```
+
+The admin login uses:
+
+```ts
+supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: `${window.location.origin}/admin/login`,
+  },
+})
+```
+
+Supabase will only honor that `redirectTo` value if the resulting URL is allowed in the Supabase Auth redirect allow-list.
+
+## Google And Apple Provider Callback URLs
+
+For Google OAuth, configure this Authorized redirect URI in Google Cloud Console:
+
+```text
+https://mfhjnxzleewxzglkbjnz.supabase.co/auth/v1/callback
+```
+
+For Apple OAuth, configure the equivalent Sign in with Apple web callback/return URL:
+
+```text
+https://mfhjnxzleewxzglkbjnz.supabase.co/auth/v1/callback
+```
+
+Important: `https://ionio-ganderkesee.de/admin/login` belongs in Supabase Allowed Redirect URLs. It is not the Google Cloud Console callback URL.
+
+## Edge Function CORS
+
+Browser-invoked Edge Functions must allow the production origins explicitly:
+
+```text
+https://ionio-ganderkesee.de
+https://www.ionio-ganderkesee.de
+http://localhost:5173
+```
+
+Preview origins can remain allowed when needed:
+
+```text
+https://ionio-culinary-canvas.vercel.app
+https://ionio-prime-web.lovable.app
+```
+
+Do not use `Access-Control-Allow-Origin: *` for authenticated browser calls.
+
+Edge Function secrets must stay in Supabase project secrets or GitHub/VPS secrets. Never expose `SUPABASE_SERVICE_ROLE_KEY` in the frontend build.
+
+## Hostinger Nginx SPA Fallback
+
+The VPS serves a static Vite build from `/opt/ionio-culinary-canvas/dist`. Because the app uses React Router `BrowserRouter`, Nginx must serve `index.html` for client-side routes:
+
+```nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+This is the Hostinger/Nginx equivalent of Vercel's SPA rewrite in `vercel.json`.
+
+## Admin Role Diagnosis
+
+If OAuth or password login succeeds but the admin area shows `Kein Zugriff`, the user exists in Supabase Auth but does not have an `admin` or `staff` row in `public.user_roles`.
+
+Check users and roles:
+
+```sql
+select
+  u.id,
+  u.email,
+  u.email_confirmed_at,
+  r.role
+from auth.users u
+left join public.user_roles r on r.user_id = u.id
+order by u.email;
+```
+
+Set an admin role for a known email:
+
+```sql
+with target_user as (
+  select id
+  from auth.users
+  where lower(email) = lower('ADMIN_EMAIL_HERE')
+),
+updated as (
+  update public.user_roles
+  set role = 'admin'::public.app_role
+  where user_id = (select id from target_user)
+  returning *
+)
+insert into public.user_roles (user_id, role)
+select id, 'admin'::public.app_role
+from target_user
+where not exists (select 1 from updated);
+```

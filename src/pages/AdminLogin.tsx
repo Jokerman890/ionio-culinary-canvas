@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { lovable } from '@/integrations/lovable/index';
 import logoImage from '@/assets/logo.png';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -75,41 +74,17 @@ export default function AdminLogin() {
     const providerName = provider === 'apple' ? 'Apple' : 'Google';
     setIsSubmitting(true);
 
-    try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: `${window.location.origin}/admin/login`,
-      });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/admin/login`,
+      },
+    });
 
-      if (result.redirected) {
-        return;
-      }
-
-      if (result.error) {
-        toast({
-          title: 'Anmeldung fehlgeschlagen',
-          description: `${providerName}-Anmeldung konnte nicht gestartet werden.`,
-          variant: 'destructive',
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast({
-          title: 'Anmeldung fehlgeschlagen',
-          description: `${providerName}-Anmeldung wurde nicht vollständig abgeschlossen.`,
-          variant: 'destructive',
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      window.location.assign('/admin');
-    } catch {
+    if (error) {
       toast({
         title: 'Anmeldung fehlgeschlagen',
-        description: `${providerName}-Anmeldung konnte nicht abgeschlossen werden.`,
+        description: `${providerName}-Anmeldung konnte nicht gestartet werden.`,
         variant: 'destructive',
       });
       setIsSubmitting(false);
