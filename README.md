@@ -92,6 +92,13 @@ Frontend-Änderungen werden über GitHub Actions gebaut und auf den Hostinger VP
 - **VPS-Build-Pfad**: `/opt/ionio-culinary-canvas/dist`
 - **Preview-URL** (optional): `https://ionio-culinary-canvas.vercel.app`
 
+## Versionierung
+
+- Dieses Projekt nutzt SemVer.
+- Die aktuelle Version steht in `package.json`.
+- Änderungen werden in `CHANGELOG.md` dokumentiert.
+- Releases werden über Git-Tags im Format `vX.Y.Z` markiert.
+
 ## 📝 Changelog
 
 ### Version 1.9.0 (2026-04-27)

@@ -4,6 +4,31 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.10.0] - 2026-04-28
+
+### 🔐 Auth / OAuth
+- Production Admin OAuth von Lovable Cloud Broker auf direkte Supabase OAuth-Flows umgestellt.
+- `/~oauth/initiate` wird in Production nicht mehr verwendet.
+- Google/Apple Login startet über Supabase Auth `/auth/v1/authorize`.
+
+### 🚀 Deployment / DevOps
+- Manuellen GitHub Actions Workflow zum Deployen der Supabase Edge Functions ergänzt.
+- Workflow deployed `login-rate-limited`, `verify-admin` und `manage-users`.
+- CORS-Verifikation für Hauptdomain und `www` ergänzt.
+
+### 🧾 Dokumentation
+- Hostinger-/Supabase-Auth-Doku erweitert.
+- Supabase Redirect URLs, Provider Callback URLs, Edge Function Redeploy und Admin-Rollen-Diagnose dokumentiert.
+
+### ✅ Qualitätssicherung
+- AdminLogin/Auth-Tests aktualisiert.
+- AdminGallery-Test an aktuellen Standardbilder-Import-State angepasst.
+- Vollständige Tests grün dokumentiert.
+
+### ⚠️ Betreiberhinweis
+- `SUPABASE_ACCESS_TOKEN` muss als GitHub Actions Secret gesetzt werden, bevor der Function-Deploy-Workflow genutzt werden kann.
+- Supabase Provider Callback bleibt: `https://mfhjnxzleewxzglkbjnz.supabase.co/auth/v1/callback`
+
 ## [1.9.0] - 2026-04-27
 
 ### 🚀 Environment-Migration (Test → Live)
