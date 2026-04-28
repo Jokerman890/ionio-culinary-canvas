@@ -119,6 +119,39 @@ curl -i -X OPTIONS \
 
 Expected result: each response returns `HTTP 200` and `Access-Control-Allow-Origin` exactly matching the request `Origin`.
 
+## Deploy Edge Functions Via GitHub Actions
+
+Use the manual `Deploy Supabase Edge Functions` workflow when local Supabase CLI login is unavailable or when the functions need to be redeployed after CORS changes.
+
+Create a Supabase access token in Supabase Dashboard -> Account -> Access Tokens -> Generate token. Store it in GitHub as a repository secret:
+
+```text
+Repository -> Settings -> Secrets and variables -> Actions -> New repository secret
+Name: SUPABASE_ACCESS_TOKEN
+```
+
+Then start the workflow manually:
+
+```text
+GitHub -> Actions -> Deploy Supabase Edge Functions -> Run workflow
+```
+
+The workflow deploys these functions to project `mfhjnxzleewxzglkbjnz`:
+
+```text
+login-rate-limited
+verify-admin
+manage-users
+```
+
+It also verifies that `https://www.ionio-ganderkesee.de` receives this CORS response:
+
+```text
+Access-Control-Allow-Origin: https://www.ionio-ganderkesee.de
+```
+
+Never commit access tokens or service role keys to the repository. Rotate the `SUPABASE_ACCESS_TOKEN` regularly. Runtime function secrets such as `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, and `SUPABASE_URL` stay in Supabase project secrets, not in the frontend build or GitHub Actions workflow.
+
 ## Hostinger Nginx SPA Fallback
 
 The VPS serves a static Vite build from `/opt/ionio-culinary-canvas/dist`. Because the app uses React Router `BrowserRouter`, Nginx must serve `index.html` for client-side routes:
