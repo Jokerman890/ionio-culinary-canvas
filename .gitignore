@@ -11,11 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.*
+# .env must be tracked so Lovable-managed Supabase credentials reach the Live build
 .env.local
-.env.production
-.env.example
+.env.production.local
+.env.development.local
 
 # Editor directories and files
 .vscode/*
