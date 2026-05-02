@@ -96,4 +96,30 @@ describe("useAuth", () => {
       refresh_token: "refresh-token",
     });
   });
+
+  it("liest Fehlermeldungen aus non-2xx Edge-Function-Antworten", async () => {
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockFrom.mockReturnValue({ select: vi.fn() });
+
+    const response = new Response(JSON.stringify({ error: "Invalid credentials" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+    mockInvoke.mockResolvedValue({
+      data: null,
+      error: {
+        message: "Edge Function returned a non-2xx status code",
+        context: response,
+      },
+    });
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      const signInResponse = await result.current.signIn("admin@test.de", "wrong-password");
+      expect(signInResponse.error?.message).toBe("Invalid credentials");
+    });
+  });
 });

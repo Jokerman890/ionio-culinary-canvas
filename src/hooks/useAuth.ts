@@ -4,6 +4,25 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type UserRole = 'admin' | 'staff' | null;
 
+const readFunctionError = async (error: unknown, fallbackMessage: string) => {
+  const context = error && typeof error === 'object' && 'context' in error
+    ? (error as { context?: unknown }).context
+    : null;
+
+  if (context instanceof Response) {
+    try {
+      const body = await context.clone().json();
+      if (body?.error && typeof body.error === 'string') {
+        return new Error(body.error);
+      }
+    } catch {
+      // Ignore malformed function error bodies and use the fallback below.
+    }
+  }
+
+  return new Error(fallbackMessage);
+};
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -72,7 +91,9 @@ export function useAuth() {
     });
 
     if (error) {
-      return { error };
+      return {
+        error: await readFunctionError(error, 'Anmeldung fehlgeschlagen'),
+      };
     }
 
     if (data?.error) {
