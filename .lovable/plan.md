@@ -93,5 +93,6 @@ Bevor Live verändert wird, exportiere ich **alle aktuellen Live-Daten** als SQL
 - ✅ Backup der alten Live-DB erstellt: `/mnt/documents/live-backup-pre-migration.sql`
 - ✅ Migrationsbericht erstellt: `/mnt/documents/migration-report.md`
 - ✅ Erkenntnis: Live-Domain zeigte auf altes externes Supabase-Projekt (`uuohpodkgblvjrhvfldl`); `.env` ist bereits auf aktuelles Lovable-Cloud-Projekt (`mfhjnxzleewxzglkbjnz`) konfiguriert → kein manueller SQL-Daten-Sync nötig, Wechsel erfolgt durch nächstes Publish.
-- ✅ Versionierung auf **1.9.0** angehoben (package.json, CHANGELOG, README)
+- ✅ Versionierung auf **1.10.1** angehoben (package.json, CHANGELOG, README).
+- ✅ **Nachtrag (2026-05-02)**: Admin-Login-Problem durch RLS-Bypass in `useAuth` behoben (Nutzung von `has_role()` statt direktem Table-SELECT).
 - ⏳ Offen für Betreiber: **Publish → Update** klicken, danach Apple/Google-Login in Live für Admin-Rollen-Zuweisung.

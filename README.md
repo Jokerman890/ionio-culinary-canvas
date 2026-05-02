@@ -101,7 +101,11 @@ Frontend-Änderungen werden über GitHub Actions gebaut und auf den Hostinger VP
 
 ## 📝 Changelog
 
-### Version 1.9.0 (2026-04-27)
+### Version 1.10.1 (2026-05-02)
+**🐛 Bugfixes**
+- Admin-Login RLS Deadlock behoben durch Nutzung der `has_role()` RPC-Funktion zum Umgehen der RLS-Policy.
+
+### Version 1.10.0 (2026-04-28)
 **🚀 Environment-Migration (Test → Live)**
 - 🔁 Production-Domain `https://ionio-ganderkesee.de/` nutzt das Supabase-Projekt `mfhjnxzleewxzglkbjnz`
 - 📦 Vollständige Inhalte nun live: 27 Kategorien, 201 Gerichte, 6 Galerie-Bilder

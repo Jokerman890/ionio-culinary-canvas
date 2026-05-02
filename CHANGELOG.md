@@ -4,6 +4,11 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.10.1] - 2026-05-02
+
+### 🐛 Bugfixes
+- **Admin-Login RLS Deadlock behoben**: `useAuth` verwendet jetzt die `has_role()` RPC-Funktion (SECURITY DEFINER) anstelle eines direkten SELECTs auf `user_roles`. Dies umgeht die RLS-Policy, die das Lesen von Rollen für nicht-Admins (und beim ersten Login) blockierte, was zuvor zu "Kein Zugriff" führte.
+
 ## [1.10.0] - 2026-04-28
 
 ### 🔐 Auth / OAuth
