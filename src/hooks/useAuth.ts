@@ -65,18 +65,34 @@ export function useAuth() {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Use the has_role() SECURITY DEFINER function instead of querying
+      // user_roles directly. The RLS policy on user_roles only allows admins
+      // to SELECT, which blocks staff users from reading their own role.
+      // has_role() bypasses RLS because it runs as the function owner.
+      const { data: isAdmin, error: adminError } = await supabase
+        .rpc('has_role', { _user_id: userId, _role: 'admin' });
 
-      if (error) {
-        console.error('Error fetching user role:', error);
+      if (adminError) {
+        console.error('Error checking admin role:', adminError);
         setRole(null);
-      } else {
-        setRole(data?.role as UserRole ?? null);
+        return;
       }
+
+      if (isAdmin) {
+        setRole('admin');
+        return;
+      }
+
+      const { data: isStaff, error: staffError } = await supabase
+        .rpc('has_role', { _user_id: userId, _role: 'staff' });
+
+      if (staffError) {
+        console.error('Error checking staff role:', staffError);
+        setRole(null);
+        return;
+      }
+
+      setRole(isStaff ? 'staff' : null);
     } catch (error) {
       console.error('Error fetching user role:', error);
       setRole(null);
