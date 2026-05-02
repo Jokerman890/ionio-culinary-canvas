@@ -86,14 +86,22 @@ export function useAuth() {
   };
 
   const signIn = async (email: string, password: string) => {
+    const fallbackMessage = 'Anmeldung fehlgeschlagen';
     const { data, error } = await supabase.functions.invoke('login-rate-limited', {
       body: { email, password },
     });
 
     if (error) {
-      return {
-        error: await readFunctionError(error, 'Anmeldung fehlgeschlagen'),
-      };
+      const functionError = await readFunctionError(error, fallbackMessage);
+      if (functionError.message !== fallbackMessage) {
+        return { error: functionError };
+      }
+
+      const { error: passwordError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error: passwordError };
     }
 
     if (data?.error) {

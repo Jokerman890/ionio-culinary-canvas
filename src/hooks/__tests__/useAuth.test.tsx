@@ -7,6 +7,7 @@ const mockOnAuthStateChange = vi.hoisted(() => vi.fn());
 const mockFrom = vi.hoisted(() => vi.fn());
 const mockInvoke = vi.hoisted(() => vi.fn());
 const mockSetSession = vi.hoisted(() => vi.fn());
+const mockSignInWithPassword = vi.hoisted(() => vi.fn());
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
@@ -14,6 +15,7 @@ vi.mock("@/integrations/supabase/client", () => ({
       onAuthStateChange: (...args: unknown[]) => mockOnAuthStateChange(...args),
       getSession: (...args: unknown[]) => mockGetSession(...args),
       setSession: (...args: unknown[]) => mockSetSession(...args),
+      signInWithPassword: (...args: unknown[]) => mockSignInWithPassword(...args),
       signUp: vi.fn(),
       signOut: vi.fn(),
     },
@@ -33,6 +35,7 @@ describe("useAuth", () => {
     mockFrom.mockReset();
     mockInvoke.mockReset();
     mockSetSession.mockReset();
+    mockSignInWithPassword.mockReset();
   });
 
   it("setzt Rolle und Auth-Status aus vorhandener Session", async () => {
@@ -120,6 +123,33 @@ describe("useAuth", () => {
     await act(async () => {
       const signInResponse = await result.current.signIn("admin@test.de", "wrong-password");
       expect(signInResponse.error?.message).toBe("Invalid credentials");
+    });
+  });
+
+  it("nutzt Supabase Passwort-Login als Fallback wenn die Edge Function keine verwertbare Antwort liefert", async () => {
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockFrom.mockReturnValue({ select: vi.fn() });
+    mockInvoke.mockResolvedValue({
+      data: null,
+      error: {
+        message: "Edge Function returned a non-2xx status code",
+        context: new Response("Internal Server Error", { status: 500 }),
+      },
+    });
+    mockSignInWithPassword.mockResolvedValue({ data: { session: {} }, error: null });
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      const signInResponse = await result.current.signIn("admin@test.de", "secret123");
+      expect(signInResponse.error).toBe(null);
+    });
+
+    expect(mockSignInWithPassword).toHaveBeenCalledWith({
+      email: "admin@test.de",
+      password: "secret123",
     });
   });
 });
