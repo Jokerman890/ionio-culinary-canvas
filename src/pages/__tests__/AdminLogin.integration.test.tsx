@@ -40,6 +40,7 @@ vi.mock('@/hooks/use-toast', () => ({
 describe('AdminLogin Integration', () => {
     beforeEach(() => {
         vi.clearAllMocks()
+        vi.unstubAllEnvs()
     })
 
     it('renders login form', async () => {
@@ -101,7 +102,22 @@ describe('AdminLogin Integration', () => {
         })
     })
 
+    it('hides OAuth login buttons unless OAuth is enabled', async () => {
+        render(
+            <BrowserRouter>
+                <AuthProvider>
+                    <AdminLogin />
+                </AuthProvider>
+            </BrowserRouter>
+        )
+
+        expect(await screen.findByRole('button', { name: /^Anmelden$/i })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /Mit Google anmelden/i })).not.toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /Mit Apple anmelden/i })).not.toBeInTheDocument()
+    })
+
     it('starts Google OAuth through Supabase with admin login redirect', async () => {
+        vi.stubEnv('VITE_ENABLE_OAUTH_LOGIN', 'true')
         mockSignInWithOAuth.mockResolvedValueOnce({ data: {}, error: null })
 
         render(
