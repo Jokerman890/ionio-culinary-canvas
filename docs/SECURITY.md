@@ -191,6 +191,9 @@ try {
 ## Passwort-Policy
 
 - Mindestlänge: **8 Zeichen** (client-seitig)
+- Zentrale Client-Policy: `src/lib/passwordPolicy.ts`
+- Verwendet in Passwort-Reset und Admin-Benutzerverwaltung
+- Änderungen an der Passwort-Policy müssen in `CHANGELOG.md` versioniert und hier dokumentiert werden
 - Supabase Auth erzwingt zusätzliche server-seitige Regeln
 
 ## Checkliste

@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { Plus, Trash2, Loader2, Shield, User, ShieldAlert, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getUserFriendlyError } from '@/lib/errorMessages';
+import { getPasswordMinLengthMessage, getPasswordMinLengthPlaceholder, isPasswordLongEnough } from '@/lib/passwordPolicy';
 
 interface UserRole {
   id: string;
@@ -80,8 +81,8 @@ export default function AdminUsers() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      toast({ title: 'Passwort muss mindestens 8 Zeichen haben', variant: 'destructive' });
+    if (!isPasswordLongEnough(newPassword)) {
+      toast({ title: getPasswordMinLengthMessage(), variant: 'destructive' });
       return;
     }
 
@@ -328,7 +329,7 @@ export default function AdminUsers() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Mindestens 8 Zeichen"
+                placeholder={getPasswordMinLengthPlaceholder()}
               />
             </div>
             <div className="space-y-2">

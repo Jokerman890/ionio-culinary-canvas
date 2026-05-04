@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { getPasswordMinLengthMessage, getPasswordMinLengthPlaceholder, isPasswordLongEnough } from '@/lib/passwordPolicy';
 import logoImage from '@/assets/logo.png';
 
 export default function ResetPassword() {
@@ -52,10 +53,10 @@ export default function ResetPassword() {
       return;
     }
 
-    if (password.length < 6) {
+    if (!isPasswordLongEnough(password)) {
       toast({
         title: 'Fehler',
-        description: 'Das Passwort muss mindestens 6 Zeichen lang sein.',
+        description: getPasswordMinLengthMessage(),
         variant: 'destructive',
       });
       return;
@@ -146,7 +147,7 @@ export default function ResetPassword() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Mindestens 6 Zeichen"
+                    placeholder={getPasswordMinLengthPlaceholder()}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isSubmitting}

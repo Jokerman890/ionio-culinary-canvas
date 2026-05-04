@@ -4,6 +4,20 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.10.2] - 2026-05-04
+
+### Sicherheit
+- Passwort-Mindestlaenge im Reset-Flow auf die bestehende 8-Zeichen-Policy vereinheitlicht.
+- Passwort-Validierung, Fehlermeldung und Placeholder verwenden jetzt die zentrale Client-Policy `src/lib/passwordPolicy.ts`.
+
+### Dokumentation
+- `docs/SECURITY.md` und `README.md` um die zentrale Passwort-Policy und Versionierungsregel ergaenzt.
+- Code-Review-Aufgaben zu Passwort-Policy, Doku-Konsistenz und Testverbesserung als erledigt dokumentiert.
+
+### Qualitaetssicherung
+- Trivialen Beispieltest durch fachlichen Passwort-Policy-Test ersetzt.
+- Policy-Test nutzt die echte Client-Policy statt einer lokalen Test-Konstante.
+
 ## [1.10.1] - 2026-05-02
 
 ### 🐛 Bugfixes

@@ -1,18 +1,21 @@
 import { describe, it, expect } from "vitest";
+import { PASSWORD_MIN_LENGTH, isPasswordLongEnough } from "./passwordPolicy";
 
 describe("Password Policy", () => {
   it("should require minimum 8 characters", () => {
-    const minLength = 8;
-    
     // Valid passwords
-    expect("12345678".length >= minLength).toBe(true);
-    expect("password".length >= minLength).toBe(true);
-    expect("SecurePass123".length >= minLength).toBe(true);
+    expect(isPasswordLongEnough("12345678")).toBe(true);
+    expect(isPasswordLongEnough("password")).toBe(true);
+    expect(isPasswordLongEnough("SecurePass123")).toBe(true);
     
     // Invalid passwords (too short)
-    expect("1234567".length >= minLength).toBe(false);
-    expect("short".length >= minLength).toBe(false);
-    expect("".length >= minLength).toBe(false);
+    expect(isPasswordLongEnough("1234567")).toBe(false);
+    expect(isPasswordLongEnough("short")).toBe(false);
+    expect(isPasswordLongEnough("")).toBe(false);
+  });
+
+  it("documents the shared minimum length", () => {
+    expect(PASSWORD_MIN_LENGTH).toBe(8);
   });
 });
 
