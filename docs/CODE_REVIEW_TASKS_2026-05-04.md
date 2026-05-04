@@ -61,3 +61,20 @@
   - `< 8` Zeichen -> Validierungsfehler.
   - `>= 8` Zeichen + gleiche Bestätigung -> Submit möglich.
 - Sicherstellen, dass der Test beim Regression-Fall (erneut 6 Zeichen) rot wird.
+
+---
+
+## Umsetzungsstatus
+
+**Version:** `1.10.2`
+
+**Erledigt:**
+- Aufgabe 1: Reset-Placeholder nutzt die zentrale 8-Zeichen-Policy.
+- Aufgabe 2: Reset-Validierung akzeptiert keine 6-/7-Zeichen-Passwoerter mehr.
+- Aufgabe 3: Passwort-Policy ist in `README.md`, `docs/SECURITY.md` und `CHANGELOG.md` dokumentiert.
+- Aufgabe 4: Der triviale Beispieltest wurde durch einen fachlichen Passwort-Policy-Test ersetzt.
+
+**Verifikation:**
+- `npm test -- --run src/lib/validation.test.ts src/test/example.test.ts`
+- `npx eslint src/lib/passwordPolicy.ts src/pages/ResetPassword.tsx src/pages/admin/AdminUsers.tsx src/lib/validation.test.ts src/test/example.test.ts`
+- `npm run build`

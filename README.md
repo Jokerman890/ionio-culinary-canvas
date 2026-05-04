@@ -68,6 +68,12 @@ supabase/
 2. **RLS-Policies**: Datenbankebene mit `is_admin_or_staff()` Funktion
 3. **Edge Functions**: Server-seitige Admin-Verifizierung via `verify-admin`
 
+### Passwort-Policy
+- Client-seitige Mindestlaenge: **8 Zeichen**
+- Zentrale Policy-Datei: `src/lib/passwordPolicy.ts`
+- Diese Policy wird im Passwort-Reset und in der Admin-Benutzerverwaltung verwendet.
+- Aenderungen an der Passwort-Policy muessen in `CHANGELOG.md` und `docs/SECURITY.md` dokumentiert werden.
+
 ### Fehlermeldungen
 Technische Fehler werden über `src/lib/errorMessages.ts` in benutzerfreundliche deutsche Meldungen übersetzt, während Details für Debugging in der Konsole protokolliert werden.
 
@@ -95,11 +101,19 @@ Frontend-Änderungen werden über GitHub Actions gebaut und auf den Hostinger VP
 ## Versionierung
 
 - Dieses Projekt nutzt SemVer.
+- Die aktuelle Lockfile-Version steht in `package-lock.json`.
+- Security-relevante Bugfixes, Policy-Aenderungen und Testverbesserungen erhalten mindestens einen Patch-Versionseintrag.
 - Die aktuelle Version steht in `package.json`.
 - Änderungen werden in `CHANGELOG.md` dokumentiert.
 - Releases werden über Git-Tags im Format `vX.Y.Z` markiert.
 
 ## 📝 Changelog
+
+### Version 1.10.2 (2026-05-04)
+**Sicherheit / Qualitaetssicherung**
+- Passwort-Reset, Admin-Benutzerverwaltung und Tests nutzen eine zentrale 8-Zeichen-Policy.
+- Dummy-Test durch fachlichen Passwort-Policy-Test ersetzt.
+- Security-Dokumentation um Policy-Quelle und Changelog-Pflicht ergaenzt.
 
 ### Version 1.10.1 (2026-05-02)
 **🐛 Bugfixes**
