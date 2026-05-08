@@ -78,3 +78,20 @@
 - `npm test -- --run src/lib/validation.test.ts src/test/example.test.ts`
 - `npx eslint src/lib/passwordPolicy.ts src/pages/ResetPassword.tsx src/pages/admin/AdminUsers.tsx src/lib/validation.test.ts src/test/example.test.ts`
 - `npm run build`
+
+---
+
+## Nachpruefung 2026-05-08
+
+**Version:** `1.10.3`
+
+**Ergaenzt:**
+- Lokale Supabase Auth-Config setzt `minimum_password_length = 8`.
+- Produktionsdokumentation fordert denselben Mindestwert in den gehosteten Supabase Auth Settings.
+- `useAuth`-Tests mocken `has_role()` per RPC und pruefen Admin- sowie Staff-Rollen.
+- Bestehende Lint-Fehler in Cookie-Banner und Menuesuche wurden beseitigt.
+
+**Verifikation:**
+- `npm test`
+- `npm run build`
+- `npm run lint`

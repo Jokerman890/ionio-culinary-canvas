@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { UtensilsCrossed, ImageIcon, FolderOpen, Users, Star, Clock, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { APP_VERSION } from '@/lib/appVersion';
 
 interface Stats {
   menuItems: number;
@@ -231,6 +232,10 @@ export default function AdminDashboard() {
             <p>• Deaktivieren Sie nicht verfügbare Gerichte statt sie zu löschen</p>
           </CardContent>
         </Card>
+
+        <p className="text-center text-xs text-muted-foreground/60">
+          Version {APP_VERSION}
+        </p>
       </div>
     </AdminLayout>
   );

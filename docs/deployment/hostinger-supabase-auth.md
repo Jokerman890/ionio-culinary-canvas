@@ -48,6 +48,24 @@ supabase.auth.signInWithOAuth({
 
 Supabase will only honor that `redirectTo` value if the resulting URL is allowed in the Supabase Auth redirect allow-list.
 
+## Password Policy
+
+The app uses a shared client-side password policy in `src/lib/passwordPolicy.ts` with a minimum length of 8 characters. Production Supabase Auth must enforce the same minimum so the policy cannot be bypassed by calling Auth APIs directly.
+
+In Supabase Dashboard, set Authentication -> Settings -> Password Security:
+
+```text
+Minimum password length: 8
+```
+
+The local Supabase CLI config mirrors this with:
+
+```toml
+[auth]
+minimum_password_length = 8
+password_requirements = ""
+```
+
 ## Google And Apple Provider Callback URLs
 
 For Google OAuth, configure this Authorized redirect URI in Google Cloud Console:

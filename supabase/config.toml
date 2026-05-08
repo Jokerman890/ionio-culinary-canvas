@@ -3,6 +3,13 @@
 # If you use staging, manage it via separate branches/config, not per-function project_id.
 project_id = "mfhjnxzleewxzglkbjnz"
 
+[auth]
+# Keep local Supabase Auth aligned with the client-side password policy.
+# Production must mirror this value in the hosted Supabase Auth settings.
+enabled = true
+minimum_password_length = 8
+password_requirements = ""
+
 [functions.verify-admin]
 # JWT validation happens in code via getUser() — gateway verify must be off for ES256 tokens.
 verify_jwt = false

@@ -193,6 +193,8 @@ try {
 - Mindestlänge: **8 Zeichen** (client-seitig)
 - Zentrale Client-Policy: `src/lib/passwordPolicy.ts`
 - Verwendet in Passwort-Reset und Admin-Benutzerverwaltung
+- Lokale Supabase Auth erzwingt die Mindestlaenge ueber `supabase/config.toml` (`minimum_password_length = 8`)
+- Die produktive Supabase-Auth-Konfiguration muss ebenfalls mindestens 8 Zeichen erzwingen
 - Änderungen an der Passwort-Policy müssen in `CHANGELOG.md` versioniert und hier dokumentiert werden
 - Supabase Auth erzwingt zusätzliche server-seitige Regeln
 

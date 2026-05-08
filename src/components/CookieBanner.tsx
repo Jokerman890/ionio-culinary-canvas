@@ -12,14 +12,12 @@ export function CookieBanner() {
       // Defer banner display until after LCP measurement window to prevent
       // the banner from being detected as the Largest Contentful Paint element.
       const showBanner = () => setIsVisible(true);
-      let timer: ReturnType<typeof setTimeout>;
-
       if ('requestIdleCallback' in window) {
         const idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(showBanner, { timeout: 3500 });
         return () => (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
       }
 
-      timer = setTimeout(showBanner, 3000);
+      const timer = setTimeout(showBanner, 3000);
       return () => clearTimeout(timer);
     }
   }, []);

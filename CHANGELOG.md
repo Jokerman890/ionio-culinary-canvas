@@ -4,6 +4,21 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 
 Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.10.3] - 2026-05-08
+
+### Sicherheit
+- Lokale Supabase Auth-Konfiguration erzwingt jetzt dieselbe 8-Zeichen-Mindestlaenge wie die Client-Policy.
+- Produktionsdokumentation stellt klar, dass die gehosteten Supabase Auth Settings denselben Mindestwert erzwingen muessen.
+
+### Bugfixes
+- `useAuth`-Tests an die `has_role()` RPC-Rollenpruefung angepasst und Staff-Rollenpfad ergaenzt.
+- Veralteten Kommentar zur `user_roles` SELECT-Policy im Auth-Hook korrigiert.
+- App-Version wird dezent im Website-Footer und im Admin-Dashboard angezeigt.
+
+### Qualitaetssicherung
+- Bestehende Lint-Fehler in Cookie-Banner und Menuesuche beseitigt.
+- Version in `package.json` und `package-lock.json` auf `1.10.3` angehoben.
+
 ## [1.10.2] - 2026-05-04
 
 ### Sicherheit

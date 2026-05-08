@@ -14,6 +14,7 @@ Vor einem Release lokal ausfuehren:
 
 ```bash
 npm ci
+npm run lint
 npm run build
 npm test
 ```
@@ -55,8 +56,8 @@ Nach dem Merge auf `main`:
 ```bash
 git switch main
 git pull origin main
-git tag v1.10.0
-git push origin v1.10.0
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
 Danach ein GitHub Release fuer den Tag erstellen und den VPS Deploy pruefen.
