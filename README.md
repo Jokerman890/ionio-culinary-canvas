@@ -72,6 +72,8 @@ supabase/
 - Client-seitige Mindestlaenge: **8 Zeichen**
 - Zentrale Policy-Datei: `src/lib/passwordPolicy.ts`
 - Diese Policy wird im Passwort-Reset und in der Admin-Benutzerverwaltung verwendet.
+- Serverseitige Mindestlaenge fuer lokale Supabase Auth ist in `supabase/config.toml` auf **8 Zeichen** gesetzt.
+- Die produktive Supabase-Auth-Konfiguration muss denselben Mindestwert erzwingen.
 - Aenderungen an der Passwort-Policy muessen in `CHANGELOG.md` und `docs/SECURITY.md` dokumentiert werden.
 
 ### Fehlermeldungen
@@ -108,6 +110,13 @@ Frontend-Änderungen werden über GitHub Actions gebaut und auf den Hostinger VP
 - Releases werden über Git-Tags im Format `vX.Y.Z` markiert.
 
 ## 📝 Changelog
+
+### Version 1.10.3 (2026-05-08)
+**Sicherheit / Qualitaetssicherung**
+- Lokale Supabase Auth-Config und Doku sind mit der zentralen 8-Zeichen-Passwort-Policy abgeglichen.
+- `useAuth`-Tests decken die `has_role()` RPC-Pruefung fuer Admin und Staff ab.
+- Website-Footer und Admin-Dashboard zeigen dezent die aktuelle App-Version.
+- Lint-Fehler in Cookie-Banner und Menuesuche wurden behoben.
 
 ### Version 1.10.2 (2026-05-04)
 **Sicherheit / Qualitaetssicherung**

@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 const mockGetSession = vi.hoisted(() => vi.fn());
 const mockOnAuthStateChange = vi.hoisted(() => vi.fn());
 const mockFrom = vi.hoisted(() => vi.fn());
+const mockRpc = vi.hoisted(() => vi.fn());
 const mockInvoke = vi.hoisted(() => vi.fn());
 const mockSetSession = vi.hoisted(() => vi.fn());
 const mockSignInWithPassword = vi.hoisted(() => vi.fn());
@@ -22,6 +23,7 @@ vi.mock("@/integrations/supabase/client", () => ({
     functions: {
       invoke: (...args: unknown[]) => mockInvoke(...args),
     },
+    rpc: (...args: unknown[]) => mockRpc(...args),
     from: (...args: unknown[]) => mockFrom(...args),
   },
 }));
@@ -33,6 +35,7 @@ describe("useAuth", () => {
     });
     mockGetSession.mockReset();
     mockFrom.mockReset();
+    mockRpc.mockReset();
     mockInvoke.mockReset();
     mockSetSession.mockReset();
     mockSignInWithPassword.mockReset();
@@ -41,11 +44,9 @@ describe("useAuth", () => {
   it("setzt Rolle und Auth-Status aus vorhandener Session", async () => {
     const mockSession = { user: { id: "user-1" } };
     mockGetSession.mockResolvedValue({ data: { session: mockSession } });
-
-    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: { role: "admin" }, error: null });
-    const mockEq = vi.fn(() => ({ maybeSingle: mockMaybeSingle }));
-    const mockSelect = vi.fn(() => ({ eq: mockEq }));
-    mockFrom.mockReturnValue({ select: mockSelect });
+    mockRpc.mockImplementation((_functionName, params) =>
+      Promise.resolve({ data: params._role === "admin", error: null })
+    );
 
     const { result } = renderHook(() => useAuth());
 
@@ -53,6 +54,23 @@ describe("useAuth", () => {
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.role).toBe("admin");
     expect(result.current.isAdmin).toBe(true);
+    expect(mockRpc).toHaveBeenCalledWith("has_role", { _user_id: "user-1", _role: "admin" });
+  });
+
+  it("setzt Staff-Rolle wenn die vorhandene Session kein Admin ist", async () => {
+    const mockSession = { user: { id: "user-2" } };
+    mockGetSession.mockResolvedValue({ data: { session: mockSession } });
+    mockRpc.mockImplementation((_functionName, params) =>
+      Promise.resolve({ data: params._role === "staff", error: null })
+    );
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.role).toBe("staff");
+    expect(result.current.isStaff).toBe(true);
+    expect(mockRpc).toHaveBeenCalledWith("has_role", { _user_id: "user-2", _role: "admin" });
+    expect(mockRpc).toHaveBeenCalledWith("has_role", { _user_id: "user-2", _role: "staff" });
   });
 
   it("setzt Status korrekt wenn keine Session vorhanden ist", async () => {

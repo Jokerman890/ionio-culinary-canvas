@@ -65,10 +65,8 @@ export function useAuth() {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      // Use the has_role() SECURITY DEFINER function instead of querying
-      // user_roles directly. The RLS policy on user_roles only allows admins
-      // to SELECT, which blocks staff users from reading their own role.
-      // has_role() bypasses RLS because it runs as the function owner.
+      // Use the has_role() SECURITY DEFINER function for role checks so the
+      // auth flow stays independent of user_roles SELECT policy changes.
       const { data: isAdmin, error: adminError } = await supabase
         .rpc('has_role', { _user_id: userId, _role: 'admin' });
 

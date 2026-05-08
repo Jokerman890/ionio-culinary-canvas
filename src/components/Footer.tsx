@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import logoImage from '@/assets/logo.png';
+import { APP_VERSION } from '@/lib/appVersion';
 
 const socialLinks = [
   {
@@ -95,6 +96,9 @@ export function Footer() {
         <div className="mt-10 pt-8 border-t border-navy-light text-center">
           <p className="text-primary-foreground/40 text-sm">
             © {new Date().getFullYear()} Griechisches Restaurant IONIO. Alle Rechte vorbehalten.
+          </p>
+          <p className="mt-2 text-primary-foreground/25 text-xs">
+            Version {APP_VERSION}
           </p>
         </div>
       </div>

@@ -14,9 +14,20 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { WeeklyOffersDisplay } from '@/components/menu/WeeklyOffersDisplay';
-import { menuCategories as fallbackCategories, allergenInfo } from '@/data/menuData';
+import {
+  menuCategories as fallbackCategories,
+  allergenInfo,
+  type MenuCategory as FallbackMenuCategory,
+  type MenuItem as FallbackMenuItem,
+} from '@/data/menuData';
 
 type MenuCategoryWithItems = MenuCategory & { items: MenuItem[] };
+type DisplayMenuCategory = MenuCategoryWithItems | FallbackMenuCategory;
+type DisplayMenuItem = MenuItem | FallbackMenuItem;
+
+function isDatabaseMenuItem(item: DisplayMenuItem): item is MenuItem {
+  return typeof item.price === 'number';
+}
 
 const DRINK_CATEGORY_NAMES = new Set([
   'Kaffee', 'Aperitif', 'Alkoholfreie Getränke', 'Bier', 'Spirituosen', 'Cocktails',
@@ -40,7 +51,7 @@ export function MenuSection() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const hasDbData = itemsByCategory.length > 0 && itemsByCategory.some(cat => cat.items.length > 0);
-  const allCategories = hasDbData ? itemsByCategory : fallbackCategories;
+  const allCategories: DisplayMenuCategory[] = hasDbData ? itemsByCategory : fallbackCategories;
 
   const foodCategories = allCategories.filter(c => !isDrinkCategory(c));
   const drinkCategories = allCategories.filter(c => isDrinkCategory(c));
@@ -66,11 +77,11 @@ export function MenuSection() {
   const searchResults = useMemo(() => {
     if (!isSearching) return [];
     const allCats = [...foodCategories, ...drinkCategories];
-    const results: { item: any; categoryName: string }[] = [];
+    const results: { item: DisplayMenuItem; categoryName: string }[] = [];
     for (const cat of allCats) {
-      for (const item of (cat as any).items || []) {
-        const name = (item.name || '').toLowerCase();
-        const desc = (item.description || '').toLowerCase();
+      for (const item of cat.items) {
+        const name = item.name.toLowerCase();
+        const desc = (item.description ?? '').toLowerCase();
         if (name.includes(normalizedQuery) || desc.includes(normalizedQuery)) {
           results.push({ item, categoryName: cat.name });
         }
@@ -133,7 +144,7 @@ export function MenuSection() {
                   <div className="grid gap-4 md:gap-6">
                     {searchResults.map(({ item, categoryName }, index) => (
                       <div key={item.id || index}>
-                        {hasDbData ? (
+                        {isDatabaseMenuItem(item) ? (
                           <DatabaseMenuItemCard item={item} index={index} />
                         ) : (
                           <FallbackMenuItemCard item={item} index={index} />
